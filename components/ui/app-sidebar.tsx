@@ -23,7 +23,7 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import useSWR from "swr";
 
-const fetchStats = async (args: any[]) => {
+const fetchStats = async () => {
   return await $fetch("/api/v1/mail/count?", { baseURL: BASE_URL }).then((e) => e.data as number[]);
 };
 
@@ -91,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Shopping",
-            url: "/mail/inbox?category=shipping",
+            url: "/mail/inbox?category=shopping",
             icon: ShoppingCart,
             badge: 8,
           },

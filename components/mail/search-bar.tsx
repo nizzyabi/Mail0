@@ -88,6 +88,14 @@ export function SearchBar() {
     300, // Adjust debounce delay
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  // useEffect(() => {
+  //   const subscription = form.watch((data) => {
+  //     submitSearch(data as { subject: string; from: string; to: string; q: string });
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [form.watch]);
+
   // TODO: please throttle this Nizzy, please
   const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
     // add logic for other fields

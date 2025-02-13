@@ -31,6 +31,7 @@ export interface SidebarData {
 
 export interface ParsedMessage {
   id: string;
+  connectionId?: string;
   title: string;
   tags: string[];
   sender: {
@@ -42,6 +43,13 @@ export interface ParsedMessage {
   body: string;
   processedHtml: string;
   blobUrl: string;
+}
+
+export interface IConnection {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
 }
 
 export interface InitialThread {

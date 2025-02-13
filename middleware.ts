@@ -1,41 +1,52 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { waitlistRateLimiter } from "./lib/rateLimit";
+import { createAuthClient } from "better-auth/client";
+
+const client = createAuthClient();
+
+// Public routes that don't require authentication
+const publicRoutes = ["/login", "/signup", "/signup/verify", "/"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const ip = request.headers.get("x-forwarded-for");
-  if (!ip) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Could not determine your IP address, please try again later!",
+  // Check if the current path is a public route
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  // For non-public routes, check authentication
+  if (!isPublicRoute) {
+    const { data: session } = await client.getSession({
+      fetchOptions: {
+        headers: {
+          cookie: request.headers.get("cookie") || "",
+        },
       },
-      { status: 400 },
-    );
-  }
+    });
 
-  switch (pathname) {
-    case "/api/auth/early-access": {
-      const rateLimiter = await waitlistRateLimiter();
-      const { success } = await rateLimiter.limit(ip);
-      if (!success) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Rate limit exceeded, please try again later!",
-          },
-          { status: 429 },
-        );
-      }
-    }
-
-    default: {
-      return NextResponse.next();
+    if (!session) {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
+
+  // Handle existing rate limiting for early access
+  if (pathname === "/api/auth/early-access") {
+    const ip = request.headers.get("x-forwarded-for");
+    if (!ip) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Could not determine your IP address, please try again later!",
+        },
+        { status: 400 },
+      );
+    }
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/auth/early-access"],
+  matcher: [
+    // Match all paths except static files and api routes (except early-access)
+    "/((?!_next/static|_next/image|favicon.ico|api(?!/auth/early-access)).*)",
+  ],
 };

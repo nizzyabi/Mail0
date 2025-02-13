@@ -25,17 +25,43 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { IConnection } from "@/types";
+import { useMemo } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import axios from "axios";
 
 export function NavUser() {
-  const { data: session } = useSession();
+  const { data: session, refetch } = useSession();
   const router = useRouter();
   const { setTheme, theme } = useTheme();
+  const { data: connections, isLoading } = useConnections();
+
+  const activeAccount = useMemo(() => {
+    if (!session) return null;
+    return connections?.find((connection) => connection.id === session?.connectionId);
+  }, [session, connections]);
+
+  const handleAccountSwitch = (connection: IConnection) => () => {
+    return axios
+      .put(`/api/v1/mail/connections/${connection.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(refetch)
+      .catch((err) => {
+        toast.error("Error switching connection", {
+          description: err.response.data.message,
+        });
+      });
+  };
 
   return (
     <DropdownMenu>
@@ -43,19 +69,30 @@ export function NavUser() {
         <SidebarMenuItem>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton className="w-fit">
-              <Image
-                src={session?.user.image || "/logo.png"}
-                alt={session?.user.name || "Example"}
-                className="shrink-0 rounded-md" // increased size and made it round
-                width={20}
-                height={20}
-              />
-              <div className="flex min-w-0 flex-col gap-1 leading-none">
-                <span className="flex items-center gap-1 font-semibold">
-                  {session?.user.name || "Guest"}{" "}
-                  <ChevronDown className="size-3 text-muted-foreground" />
-                </span>
-              </div>
+              {isLoading ? (
+                <>
+                  <div className="size-5 animate-pulse rounded-md bg-muted" />
+                  <div className="flex min-w-0 flex-col gap-1 leading-none">
+                    <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Image
+                    src={activeAccount?.picture || session?.user.image || "/logo.png"}
+                    alt={activeAccount?.name || session?.user.name || "User"}
+                    className="shrink-0 rounded-md"
+                    width={20}
+                    height={20}
+                  />
+                  <div className="flex min-w-0 flex-col gap-1 leading-none">
+                    <span className="flex items-center gap-1 truncate text-[12px] font-semibold">
+                      {(activeAccount?.email || session?.user.email)?.slice(0, 16)}...
+                      <ChevronDown className="size-3 text-muted-foreground" />
+                    </span>
+                  </div>
+                </>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
         </SidebarMenuItem>
@@ -78,29 +115,41 @@ export function NavUser() {
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent className="ml-1">
-                  <DropdownMenuItem>
-                    <Image
-                      src={session.user.image || "/placeholder.svg"}
-                      alt={session.user.name}
-                      className="size-4 shrink-0 rounded-lg"
-                      width={16}
-                      height={16}
-                    />
-                    {session.user.email}
-                  </DropdownMenuItem>
+                  {connections?.map((connection) => (
+                    <DropdownMenuItem
+                      key={connection.id}
+                      onClick={handleAccountSwitch(connection)}
+                      className="flex items-center gap-2"
+                    >
+                      <Image
+                        src={connection.picture || "/placeholder.svg"}
+                        alt={connection.name || connection.email}
+                        className="size-4 shrink-0 rounded"
+                        width={16}
+                        height={16}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-[12px]">{connection.name || connection.email}</span>
+                        {connection.name && (
+                          <span className="text-[12px] text-muted-foreground">
+                            {connection.email}
+                          </span>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
                     <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
                     Add another account
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
               <Cog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={async () => {

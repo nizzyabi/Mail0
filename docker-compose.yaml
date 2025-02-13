@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super-secret-password
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: mail0
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:

@@ -1,10 +1,5 @@
-import {
-  ALLOWED_HTML_TAGS,
-  ALLOWED_HTML_ATTRIBUTES,
-  ALLOWED_HTML_STYLES,
-  EMAIL_HTML_TEMPLATE,
-} from "@/lib/constants";
-import sanitizeHtml from "sanitize-html";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ParsedMessage } from "@/types";
 import { google } from "googleapis";
 import * as he from "he";
@@ -15,10 +10,16 @@ interface MailManager {
   delete(id: string): Promise<any>;
   list(folder: string, query?: string, maxResults?: number, labelIds?: string[]): Promise<any>;
   count(): Promise<any>;
+  generateConnectionAuthUrl(userId: string): string;
+  getTokens(
+    code: string,
+  ): Promise<{ tokens: { access_token?: any; refresh_token?: any; expiry_date?: number } }>;
+  getUserInfo(tokens: IConfig["auth"]): Promise<any>;
+  getScope(): string;
 }
 
 interface IConfig {
-  auth: {
+  auth?: {
     access_token: string;
     refresh_token: string;
   };
@@ -50,22 +51,26 @@ const findHtmlBody = (parts: any[]): string => {
   return "";
 };
 
-// function createEmailHtml(decodedBody: string): string {
-//   const sanitizedHtml = sanitizeHtml(decodedBody, {
-//     allowedTags: ALLOWED_HTML_TAGS,
-//     allowedAttributes: ALLOWED_HTML_ATTRIBUTES,
-//     allowedStyles: ALLOWED_HTML_STYLES,
-//   });
+const googleDriver = async (config: IConfig): Promise<MailManager> => {
+  const auth = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID as string,
+    process.env.GOOGLE_CLIENT_SECRET as string,
+    process.env.GOOGLE_REDIRECT_URI as string,
+  );
 
-//   return EMAIL_HTML_TEMPLATE.replace("{{content}}", sanitizedHtml);
-// }
-
-const googleDriver = (config: IConfig): MailManager => {
-  const auth = new google.auth.OAuth2({
-    clientId: process.env.GOOGLE_CLIENT_ID as string,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-  });
-  auth.setCredentials({ ...config.auth, scope: "https://mail.google.com/" });
+  const getScope = () =>
+    [
+      "https://mail.google.com/",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+    ].join(" ");
+  if (config.auth) {
+    auth.setCredentials({
+      access_token: config.auth.access_token,
+      refresh_token: config.auth.refresh_token,
+      scope: getScope(),
+    });
+  }
   const parse = ({
     id,
     snippet,
@@ -105,6 +110,31 @@ const googleDriver = (config: IConfig): MailManager => {
   };
   const gmail = google.gmail({ version: "v1", auth });
   return {
+    getScope,
+    getUserInfo: (tokens: { access_token: string; refresh_token: string }) => {
+      auth.setCredentials({ ...tokens, scope: getScope() });
+      return google
+        .people({ version: "v1", auth })
+        .people.get({ resourceName: "people/me", personFields: "names,photos,emailAddresses" });
+    },
+    getTokens: async <T>(code: string) => {
+      try {
+        const { tokens } = await auth.getToken(code);
+        return { tokens } as T;
+      } catch (error) {
+        console.error("Error getting tokens:", error);
+        throw error;
+      }
+    },
+    generateConnectionAuthUrl: (userId: string) => {
+      return auth.generateAuthUrl({
+        access_type: "offline",
+        scope: getScope(),
+        include_granted_scopes: true,
+        prompt: "consent",
+        state: userId,
+      });
+    },
     count: async () => {
       const folders = ["inbox", "spam"];
       // this sometimes fails due to wrong crednetials
@@ -217,10 +247,10 @@ const SupportedProviders = {
   google: googleDriver,
 };
 
-export const createDriver = (
+export const createDriver = async (
   provider: keyof typeof SupportedProviders | string,
   config: IConfig,
-): MailManager => {
+): Promise<MailManager> => {
   const factory = SupportedProviders[provider as keyof typeof SupportedProviders];
   if (!factory) throw new Error("Provider not supported");
   switch (provider) {

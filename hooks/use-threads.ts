@@ -76,7 +76,7 @@ const threadsCache = {
 
 // TODO: improve the filters
 const fetchEmails = async (args: any[]) => {
-  const [_, folder, query, max, labelIds] = args;
+  const [_, folder, query, max, labelIds, connectionId] = args;
 
   let searchParams = new URLSearchParams();
   if (max) searchParams.set("max", max.toString());
@@ -88,19 +88,19 @@ const fetchEmails = async (args: any[]) => {
     baseURL: BASE_URL,
     onSuccess(context) {
       // reversing the order of the messages to make sure the newest ones are at the top
-      threadsCache.bulkPut(context.data.messages, searchParams.toString());
+      threadsCache.bulkPut(context.data.messages, searchParams.toString() + connectionId);
     },
   }).then((e) => e.data)) as RawResponse;
 };
 
 const fetchEmailsFromCache = async (args: any[]) => {
-  const [, , folder, query, max, labelIds] = args;
+  const [, , folder, query, max, labelIds, connectionId] = args;
   let searchParams = new URLSearchParams();
   if (max) searchParams.set("max", max.toString());
   if (query) searchParams.set("q", query);
   if (folder) searchParams.set("folder", folder.toString());
   if (labelIds) searchParams.set("labelIds", labelIds.join(","));
-  const data = await threadsCache.list(searchParams.toString());
+  const data = await threadsCache.list(searchParams.toString() + connectionId);
   return { messages: data.reverse() };
 };
 
@@ -108,7 +108,7 @@ const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
   const [_, id] = args;
   const existing = await threadsCache.get(id);
   if (existing?.blobUrl) return existing as ParsedMessage;
-  return await $fetch(`/api/v1/${id}/`, {
+  return await $fetch(`/api/v1/mail/${id}/`, {
     baseURL: BASE_URL,
     onSuccess(context) {
       threadsCache.update({
@@ -135,7 +135,7 @@ interface ThreadsResponse {
 const useCachedThreads = (folder: string, labelIds?: string[], query?: string, max?: number) => {
   const { data: session } = useSession();
   const { data, isLoading, error } = useSWR<ThreadsResponse>(
-    ["cache", session?.user.id, folder, query, max, labelIds],
+    ["cache", session?.user.id, folder, query, max, labelIds, session?.connectionId],
     fetchEmailsFromCache,
   );
 
@@ -146,7 +146,9 @@ export const useThreads = (folder: string, labelIds?: string[], query?: string, 
   const { data: cachedThreads } = useCachedThreads(folder, labelIds, query, max);
   const { data: session } = useSession();
   const { data, isLoading, error } = useSWR<RawResponse>(
-    session?.user.id ? [session?.user.id, folder, query, max, labelIds] : null,
+    session?.user.id
+      ? [session?.user.id, folder, query, max, labelIds, session.connectionId]
+      : null,
     fetchEmails,
   );
 
@@ -160,7 +162,7 @@ export const useThreads = (folder: string, labelIds?: string[], query?: string, 
 export const useThread = (id: string) => {
   const { data: session } = useSession();
   const { data, isLoading, error } = useSWR<ParsedMessage>(
-    session?.user.id ? [session.user.id, id] : null,
+    session?.user.id ? [session.user.id, id, session.connectionId] : null,
     fetchEmail,
     {
       revalidateOnFocus: false,

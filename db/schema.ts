@@ -10,6 +10,7 @@ export const user = createTable("user", {
   image: text("image"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
+  defaultConnectionId: text("default_connection_id"),
 });
 
 export const session = createTable("session", {
@@ -55,6 +56,23 @@ export const verification = createTable("verification", {
 export const earlyAccess = createTable("early_access", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const connection = createTable("connection", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  picture: text("picture"),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  scope: text("scope").notNull(),
+  providerId: text("provider_id").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });

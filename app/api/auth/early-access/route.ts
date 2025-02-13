@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { earlyAccess } from "@/db/schema";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 
 type PostgresError = {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await db.insert(earlyAccess).values({
-        id: nanoid(),
+        id: randomUUID(),
         email,
         createdAt: now,
         updatedAt: now,

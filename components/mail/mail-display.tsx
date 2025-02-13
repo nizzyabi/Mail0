@@ -14,21 +14,21 @@ import {
   X,
   BellOff,
 } from "lucide-react";
-import { format } from "date-fns/format";
+import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 import { DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useThread } from "@/hooks/use-threads";
 import { Badge } from "@/components/ui/badge";
 import { useMail } from "./use-mail";
+import { format } from "date-fns";
 import Image from "next/image";
 interface MailDisplayProps {
   mail: string | null;
@@ -44,10 +44,10 @@ interface ReplyState {
 
 export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
   const [, setMail] = useMail();
+  const { data: emailData, isLoading } = useThread(mail ?? "");
   const [isMuted, setIsMuted] = useState(false);
   // const [attachments, setAttachments] = useState<File[]>([]);
   // const [isUploading, setIsUploading] = useState(false);
-  const { data: emailData, isLoading, error } = useThread(mail || "");
   const [copySuccess, setCopySuccess] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -67,18 +67,6 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
     onClose?.();
     setMail({ selected: null });
   }, [onClose, setMail]);
-
-  const handleCopy = async () => {
-    if (emailData) {
-      try {
-        await navigator.clipboard.writeText(JSON.stringify(emailData, null, 2));
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
-      } catch (err) {
-        console.error("Failed to copy:", err);
-      }
-    }
-  };
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -180,17 +168,22 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
     );
   };
 
+  const handleCopy = async () => {
+    if (emailData) {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(emailData, null, 2));
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    }
+  };
+
   if (isLoading) {
     return <div className="flex h-full items-center justify-center">Loading...</div>;
   }
 
-  if (error) {
-    return (
-      <div className="flex h-full items-center justify-center text-destructive">
-        Failed to load message
-      </div>
-    );
-  }
   if (!emailData || !mail) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -412,7 +405,7 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
                 <div className="flex items-center gap-2">
                   <Reply className="h-4 w-4" />
                   <p className="truncate">
-                    {emailData.sender.name} ({emailData.sender.email})
+                    {emailData?.sender.name} ({emailData?.sender.email})
                   </p>
                 </div>
               </div>

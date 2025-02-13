@@ -1,12 +1,15 @@
-import { createDriver } from "../../driver";
+import { createDriver } from "../../../driver";
 import { NextRequest } from "next/server";
 import { connection } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 
-export const GET = async ({ headers, nextUrl }: NextRequest) => {
-  const searchParams = nextUrl.searchParams;
+export const GET = async (
+  { headers }: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) => {
+  const { id } = await params;
   const session = await auth.api.getSession({ headers });
   if (!session) return new Response("Unauthorized", { status: 401 });
 
@@ -22,22 +25,13 @@ export const GET = async ({ headers, nextUrl }: NextRequest) => {
     return new Response("Unauthorized, reconnect", { status: 402 });
 
   const driver = await createDriver(_connection.providerId, {
+    // Assuming "google" is the provider ID
     auth: {
       access_token: _connection.accessToken,
       refresh_token: _connection.refreshToken,
     },
   });
 
-  if (!searchParams.has("folder")) return new Response("Bad Request", { status: 400 });
-
-  return new Response(
-    JSON.stringify(
-      await driver.list(
-        searchParams.get("folder")!,
-        searchParams.get("q") ?? undefined,
-        Number(searchParams.get("max")) ? +searchParams.get("max")! : undefined,
-        searchParams.get("labelIds") ? searchParams.get("labelIds")!.split(",") : undefined,
-      ),
-    ),
-  );
+  const res = await driver.get(id);
+  return new Response(JSON.stringify(res));
 };

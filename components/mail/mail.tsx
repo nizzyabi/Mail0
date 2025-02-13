@@ -24,6 +24,7 @@ import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useSearchValue } from "@/hooks/use-search-value";
 import { SidebarToggle } from "../ui/sidebar-toggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type Mail } from "@/components/mail/data";
 import { useSearchParams } from "next/navigation";
 import { useThreads } from "@/hooks/use-threads";
@@ -72,6 +73,8 @@ export function Mail({ folder }: MailProps) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
+  const [isTransitioning, setIsTransitioning] = useState(true);
+
   // Check if we're on mobile on mount and when window resizes
   React.useEffect(() => {
     const checkIsMobile = () => {
@@ -91,6 +94,18 @@ export function Mail({ folder }: MailProps) {
       setOpen(false);
     }
   }, [mail.selected]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setIsTransitioning(true);
+    }
+  }, [isLoading]);
 
   const handleClose = useCallback(() => {
     setOpen(false);
@@ -140,6 +155,32 @@ export function Mail({ folder }: MailProps) {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
+                  <Separator className="mt-2" />
+                </div>
+
+                <div className="h-[calc(93vh)]">
+                  {isLoading || isTransitioning ? (
+                    <div className="flex flex-col">
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} className="flex flex-col border-b px-4 py-4">
+                          <div className="flex w-full items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Skeleton className="h-4 w-24" />
+                            </div>
+                            <Skeleton className="h-3 w-12" />
+                          </div>
+                          <Skeleton className="mt-2 h-3 w-32" />
+                          <Skeleton className="mt-2 h-3 w-full" />
+                          <div className="mt-2 flex gap-2">
+                            <Skeleton className="h-5 w-16 rounded-md" />
+                            <Skeleton className="h-5 w-16 rounded-md" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <MailList items={threadsResponse?.messages || []} />
+                  )}
                 </div>
                 <Separator className="mt-2" />
               </div>
