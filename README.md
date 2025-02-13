@@ -112,7 +112,8 @@ Before running the application, you'll need to set up several services and envir
 > [!IMPORTANT]
 > The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
 
-- Add the following APIs to your Google Cloud Project: People API, Gmail API
+- Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
+  - Use links above and click 'Enable' or
   - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
   - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
 
