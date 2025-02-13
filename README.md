@@ -109,7 +109,8 @@ Before running the application, you'll need to set up several services and envir
      GOOGLE_REDIRECT_URI=http://localhost:3000/api/v1/mail/auth/google/callback
      ```
 
-   > **Important**: The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
+   > [!IMPORTANT]
+   > The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
 
    - Add the following APIs to your Google Cloud Project: People API, Gmail API
      - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
