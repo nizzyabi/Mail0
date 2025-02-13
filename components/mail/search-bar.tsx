@@ -14,11 +14,11 @@ import { useDebouncedCallback } from "use-debounce";
 import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
 import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 const inboxes = ["All Mail", "Inbox", "Drafts", "Sent", "Spam", "Trash", "Archive"];
 
@@ -78,31 +78,20 @@ export function SearchBar() {
     },
   });
 
-  // Debounce the search submission to prevent rapid calls
-  const debouncedSubmitSearch = useDebouncedCallback(
-    (data: { subject: string; from: string; to: string; q: string }) => {
-      setSearchValue({
-        value: data.q,
-      });
-    },
-    300, // Adjust debounce delay
-  );
-
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  // useEffect(() => {
-  //   const subscription = form.watch((data) => {
-  //     submitSearch(data as { subject: string; from: string; to: string; q: string });
-  //   });
-  //   return () => subscription.unsubscribe();
-  // }, [form.watch]);
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      submitSearch(data as { subject: string; from: string; to: string; q: string });
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   // TODO: please throttle this Nizzy, please
   const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
     // add logic for other fields
-    debouncedSubmitSearch(data);
-    // setSearchValue({
-    //   value: data.q,
-    // });
+    setSearchValue({
+      value: data.q,
+    });
   };
 
   const resetSearch = () => {
@@ -114,7 +103,7 @@ export function SearchBar() {
 
   return (
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
-      <form onSubmit={form.handleSubmit(submitSearch)} className="relative flex items-center">
+      <form className="relative flex items-center">
         <Form {...form}>
           <Search
             className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
@@ -239,7 +228,7 @@ export function SearchBar() {
                     <Button onClick={resetSearch} variant="ghost" size="sm" className="h-7 text-xs">
                       Reset
                     </Button>
-                    <Button type="submit" size="sm" className="h-7 text-xs">
+                    <Button size="sm" className="h-7 text-xs">
                       Apply Filters
                     </Button>
                   </div>

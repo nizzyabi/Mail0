@@ -4,7 +4,15 @@ import { createAuthClient } from "better-auth/client";
 const client = createAuthClient();
 
 // Public routes that don't require authentication
-const publicRoutes = ["/login", "/signup", "/signup/verify", "/"];
+const publicRoutes = [
+  "/login",
+  "/signup",
+  "/signup/verify",
+  "/",
+  "/privacy",
+  "/terms",
+  "/api/auth/early-access",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
