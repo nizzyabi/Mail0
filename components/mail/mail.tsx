@@ -114,15 +114,18 @@ export function Mail({ folder }: MailProps) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="rounded-inherit flex">
+      <div className="rounded-inherit flex h-screen">
         <ResizablePanelGroup
           direction="horizontal"
-          autoSaveId={"mail-panel-layout"}
+          autoSaveId="mail-panel-layout"
           className="rounded-inherit overflow-hidden"
         >
+          {/* Mail List Panel */}
           <ResizablePanel defaultSize={isMobile ? 100 : 35} minSize={isMobile ? 100 : 35}>
-            <div className="flex-1 overflow-y-auto">
-              <div className="sticky top-0 z-10 rounded-t-md bg-background pt-[6px]">
+            <div className="flex h-full flex-1 flex-col overflow-y-auto">
+              {/* Header Section */}
+              <div className="sticky top-0 z-50 rounded-t-md bg-background pt-[6px]">
+                {/* Toolbar */}
                 <div className="flex items-center justify-between px-2">
                   <div className="flex items-center gap-1">
                     <SidebarToggle className="h-fit px-2" />
@@ -130,7 +133,9 @@ export function Mail({ folder }: MailProps) {
                       <ComposeButton />
                     </React.Suspense>
                   </div>
+                  {/* Search Bar */}
                   <SearchBar />
+                  {/* Filter Controls */}
                   <div className="flex items-center space-x-1.5">
                     <Button
                       variant="ghost"
@@ -155,12 +160,12 @@ export function Mail({ folder }: MailProps) {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  <Separator className="mt-2" />
                 </div>
-
-                <div className="h-[calc(93vh)]">
+                <Separator className="mt-2" />
+                {/* Mail List Section */}
+                <div className="flex-1 overflow-hidden">
                   {isLoading || isTransitioning ? (
-                    <div className="flex flex-col">
+                    <div className="flex h-full flex-col overflow-y-auto">
                       {[...Array(8)].map((_, i) => (
                         <div key={i} className="flex flex-col border-b px-4 py-4">
                           <div className="flex w-full items-center justify-between">
@@ -179,17 +184,16 @@ export function Mail({ folder }: MailProps) {
                       ))}
                     </div>
                   ) : (
-                    <MailList items={threadsResponse?.messages || []} />
+                    <div className="h-[calc(100vh-4rem)] overflow-y-auto">
+                      <MailList items={threadsResponse?.messages || []} />
+                    </div>
                   )}
                 </div>
-                <Separator className="mt-2" />
-              </div>
-              <div className="h-[calc(93vh)]">
-                {isLoading ? null : <MailList items={threadsResponse?.messages || []} />}
               </div>
             </div>
           </ResizablePanel>
 
+          {/* Mail Display Panel */}
           {isDesktop && mail.selected && (
             <>
               <ResizableHandle withHandle />
@@ -205,7 +209,7 @@ export function Mail({ folder }: MailProps) {
         {/* Mobile Drawer */}
         {!isDesktop && (
           <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerContent className="h-[calc(100vh-3rem)] p-0">
+            <DrawerContent className="h-[calc(100vh-4rem)] p-0">
               <DrawerHeader className="sr-only">
                 <DrawerTitle>Email Details</DrawerTitle>
               </DrawerHeader>
