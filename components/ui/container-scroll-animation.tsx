@@ -1,5 +1,6 @@
 "use client";
 import { useScroll, useTransform, motion, MotionValue } from "motion/react";
+import { useIsMobile } from "../../hooks/use-mobile";
 import React, { useRef } from "react";
 
 export const ContainerScroll = ({ children }: { children: React.ReactNode }) => {
@@ -7,18 +8,7 @@ export const ContainerScroll = ({ children }: { children: React.ReactNode }) => 
   const { scrollYProgress } = useScroll({
     target: containerRef,
   });
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
+  const isMobile = useIsMobile();
 
   const scaleDimensions = () => {
     return isMobile ? [0.65, 0.75] : [1.05, 1];
@@ -50,6 +40,7 @@ export const ContainerScroll = ({ children }: { children: React.ReactNode }) => 
 export const Card = ({
   rotate,
   scale,
+  translate,
   children,
 }: {
   rotate: MotionValue<number>;
