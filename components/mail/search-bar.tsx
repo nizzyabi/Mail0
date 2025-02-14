@@ -69,6 +69,8 @@ function DateFilter() {
 
 export function SearchBar() {
   const [, setSearchValue] = useSearchValue();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const form = useForm({
     defaultValues: {
       subject: "",
@@ -78,32 +80,42 @@ export function SearchBar() {
     },
   });
 
+  const submitSearch = useDebouncedCallback(
+    (data: { subject: string; from: string; to: string; q: string }) => {
+      setSearchValue({
+        value: data.q,
+        filters: {
+          ...data,
+          dateRange,
+        },
+      });
+    },
+    300,
+    { maxWait: 2000 },
+  );
+
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     const subscription = form.watch((data) => {
       submitSearch(data as { subject: string; from: string; to: string; q: string });
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form, form.watch, submitSearch]);
 
-  // TODO: please throttle this Nizzy, please
-  const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
-    // add logic for other fields
-    setSearchValue({
-      value: data.q,
-    });
-  };
+  const handleSubmit = form.handleSubmit((data) => {
+    submitSearch(data);
+    setIsPopoverOpen(false);
+  });
 
   const resetSearch = () => {
     form.reset();
-    setSearchValue({
-      value: "",
-    });
+    setDateRange(undefined);
+    setSearchValue({ value: "", filters: {} });
   };
 
   return (
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
-      <form className="relative flex items-center">
+      <form onSubmit={handleSubmit} className="relative flex items-center">
         <Form {...form}>
           <Search
             className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
@@ -115,7 +127,7 @@ export function SearchBar() {
             {...form.register("q")}
           />
           <div className="absolute right-2 flex items-center">
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-5 w-5 p-0 hover:bg-transparent">
                   <SlidersHorizontal
@@ -131,7 +143,6 @@ export function SearchBar() {
                 align="end"
               >
                 <div className="space-y-4">
-                  {/* Quick Filters */}
                   <div>
                     <h2 className="mb-2 text-xs font-medium text-muted-foreground">
                       Quick Filters
@@ -151,7 +162,6 @@ export function SearchBar() {
 
                   <Separator className="my-2" />
 
-                  {/* Main Filters */}
                   <div className="grid gap-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-muted-foreground">Search in</label>
@@ -200,35 +210,16 @@ export function SearchBar() {
 
                   <Separator className="my-2" />
 
-                  {/* Labels */}
-                  <div>
-                    <h2 className="mb-2 text-xs font-medium text-muted-foreground">Labels</h2>
-                    <div className="flex flex-wrap gap-1.5">
-                      <Button variant="outline" size="sm" className="h-7 text-xs">
-                        Work
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-7 text-xs">
-                        Personal
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-7 text-xs">
-                        Important
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs text-muted-foreground"
-                      >
-                        + Add
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
                   <div className="flex items-center justify-between pt-2">
                     <Button onClick={resetSearch} variant="ghost" size="sm" className="h-7 text-xs">
                       Reset
                     </Button>
-                    <Button size="sm" className="h-7 text-xs">
+                    <Button
+                      type="submit"
+                      onClick={() => setIsPopoverOpen(false)}
+                      size="sm"
+                      className="h-7 text-xs"
+                    >
                       Apply Filters
                     </Button>
                   </div>
