@@ -196,7 +196,7 @@ const googleDriver = async (config: IConfig): Promise<MailManager> => {
           .filter((msg): msg is NonNullable<typeof msg> => msg !== null),
       );
 
-      return { ...res.data, threads };
+      return { ...res.data, threads } as any;
     },
     get: async (id: string) => {
       const res = await gmail.users.threads.get({ userId: "me", id, format: "full" });

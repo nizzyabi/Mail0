@@ -113,14 +113,14 @@ const fetchEmailsFromCache = async (args: any[]) => {
   if (query) searchParams.set("q", query);
   if (folder) searchParams.set("folder", folder.toString());
   if (labelIds) searchParams.set("labelIds", labelIds.join(","));
-  const data = await threadsCache.list(searchParams.toString() + connectionId);
+  const data = (await threadsCache.list(searchParams.toString() + connectionId)) as any;
   return { threads: data.reverse() };
 };
 
-const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
+const fetchEmail = async (args: any[]): Promise<ParsedMessage[]> => {
   const [_, id] = args;
-  const existing = await threadsCache.get(id);
-  if (existing?.blobUrl) return existing as ParsedMessage;
+  // const existing = await threadsCache.get(id);
+  // if (existing?.blobUrl) return existing as ParsedMessage[];
   return await $fetch(`/api/v1/mail/${id}/`, {
     baseURL: BASE_URL,
     onSuccess(context) {
@@ -131,7 +131,7 @@ const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
       //   body: context.data.body,
       // });
     },
-  }).then((e) => e.data as ParsedMessage);
+  }).then((e) => e.data as ParsedMessage[]);
 };
 
 // Based on gmail
@@ -142,7 +142,7 @@ interface RawResponse {
 }
 
 interface ThreadsResponse {
-  threads: ParsedMessage[];
+  threads: InitialThread[];
 }
 
 const useCachedThreads = (folder: string, labelIds?: string[], query?: string, max?: number) => {
