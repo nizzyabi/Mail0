@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import * as React from "react";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { MailDisplay } from "@/components/mail/mail-display";
+import { ThreadDisplay } from "@/components/mail/thread-display";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MailList } from "@/components/mail/mail-list";
 import { Separator } from "@/components/ui/separator";
@@ -193,7 +193,7 @@ export function Mail({ folder }: MailProps) {
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
                 <div className="hidden h-full flex-1 overflow-y-auto md:block">
-                  <MailDisplay mail={mail.selected} onClose={handleClose} />
+                  <ThreadDisplay mail={mail.selected} onClose={handleClose} />
                 </div>
               </ResizablePanel>
             </>
@@ -208,7 +208,7 @@ export function Mail({ folder }: MailProps) {
                 <DrawerTitle>Email Details</DrawerTitle>
               </DrawerHeader>
               <div className="flex h-full flex-col overflow-hidden">
-                <MailDisplay mail={mail.selected} onClose={handleClose} isMobile={true} />
+                <ThreadDisplay mail={mail.selected} onClose={handleClose} isMobile={true} />
               </div>
             </DrawerContent>
           </Drawer>
