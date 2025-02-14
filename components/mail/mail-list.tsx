@@ -1,10 +1,11 @@
 import { ComponentProps, useMemo, useEffect, useRef, useState } from "react";
 import { preloadThread, useMarkAsRead } from "@/hooks/use-threads";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { InitialThread, ParsedMessage } from "@/types";
 import { useMail } from "@/components/mail/use-mail";
 import { useSession } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
-import { InitialThread } from "@/types";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface MailListProps {
@@ -106,6 +107,11 @@ const Thread = ({ message: initialMessage }: { message: InitialThread }) => {
       <div className="flex w-full flex-col gap-1">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2">
+            {message.totalReplies > 1 && (
+              <p className="rounded-full border border-dashed border-muted-foreground px-1.5 py-0.5 text-xs font-bold">
+                {message.totalReplies}
+              </p>
+            )}
             <p
               className={cn(
                 message.unread ? "font-bold" : "font-medium",

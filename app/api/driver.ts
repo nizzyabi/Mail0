@@ -1,15 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ParsedMessage } from "@/types";
-import { google } from "googleapis";
+import { ParsedMessage, InitialThread } from "@/types";
+import { type gmail_v1, google } from "googleapis";
 import { env } from "@/lib/env";
 import * as he from "he";
 
 interface MailManager {
-  get(id: string): Promise<any>;
+  get(id: string): Promise<ParsedMessage[] | undefined>;
   create(data: any): Promise<any>;
   delete(id: string): Promise<any>;
-  list(folder: string, query?: string, maxResults?: number, labelIds?: string[]): Promise<any>;
+  list<T>(
+    folder: string,
+    query?: string,
+    maxResults?: number,
+    labelIds?: string[],
+  ): Promise<(T & { threads: InitialThread[] }) | undefined>;
   count(): Promise<any>;
   generateConnectionAuthUrl(userId: string): string;
   getTokens(
@@ -78,30 +83,25 @@ const googleDriver = async (config: IConfig): Promise<MailManager> => {
     snippet,
     labelIds,
     payload,
-  }: {
-    id: string;
-    snippet: string;
-    labelIds: string[];
-    payload: {
-      headers: { name: string; value: string }[];
-      body?: { data?: string };
-      parts?: any[];
-    };
-    body: string;
-  }): Omit<ParsedMessage, "body" | "processedHtml" | "blobUrl"> => {
-    const receivedOn = payload.headers.find((h) => h.name === "Date")?.value || "Failed";
-    const sender = payload.headers.find((h) => h.name === "From")?.value || "Failed";
+  }: gmail_v1.Schema$Message): Omit<
+    ParsedMessage,
+    "body" | "processedHtml" | "blobUrl" | "totalReplies"
+  > => {
+    const receivedOn = payload?.headers?.find((h) => h.name === "Date")?.value || "Failed";
+    const sender = payload?.headers?.find((h) => h.name === "From")?.value || "Failed";
+    const subject = payload?.headers?.find((h) => h.name === "Subject")?.value || "Failed";
     const [name, email] = sender.split("<");
     return {
-      id,
-      title: he.decode(snippet).trim(),
-      tags: labelIds,
+      id: id || "ERROR",
+      title: snippet ? he.decode(snippet).trim() : "ERROR",
+      tags: labelIds || [],
       sender: {
         name: name.replace(/"/g, "").trim(),
         email: `<${email}`,
       },
-      unread: labelIds.includes("UNREAD"),
+      unread: labelIds ? labelIds.includes("UNREAD") : false,
       receivedOn,
+      subject,
     };
   };
   const normalizeSearch = (folder: string, q: string) => {
@@ -167,81 +167,81 @@ const googleDriver = async (config: IConfig): Promise<MailManager> => {
       const { folder: normalizedFolder, q: normalizedQ } = normalizeSearch(folder, q ?? "");
       const labelIds = [..._labelIds];
       if (normalizedFolder) labelIds.push(normalizedFolder.toUpperCase());
-      const res = await gmail.users.messages.list({
+      const res = await gmail.users.threads.list({
         userId: "me",
         q: normalizedQ ? normalizedQ : undefined,
         labelIds,
         maxResults,
       });
-      const messages = await Promise.all(
-        (res.data.messages || [])
-          .map(async (message) => {
-            if (!message.id) return null;
-            const msg = await gmail.users.messages.get({
+      const threads = await Promise.all(
+        (res.data.threads || [])
+          .map(async (thread) => {
+            if (!thread.id) return null;
+            const msg = await gmail.users.threads.get({
               userId: "me",
-              id: message.id,
+              id: thread.id,
               format: "metadata",
               metadataHeaders: ["From", "Subject", "Date"],
             });
-            const parsed = parse(msg.data as any);
+            const message = msg.data.messages?.[0];
+            const parsed = parse(message as any);
             return {
               ...parsed,
               body: "",
               processedHtml: "",
               blobUrl: "",
+              totalReplies: msg.data.messages?.length || 0,
             };
           })
           .filter((msg): msg is NonNullable<typeof msg> => msg !== null),
       );
 
-      return { ...res.data, messages };
+      return { ...res.data, threads };
     },
     get: async (id: string) => {
-      const res = await gmail.users.messages.get({ userId: "me", id, format: "full" });
-      const bodyData =
-        res.data.payload?.body?.data ||
-        (res.data.payload?.parts ? findHtmlBody(res.data.payload.parts) : "") ||
-        res.data.payload?.parts?.[0]?.body?.data ||
-        ""; // Fallback to first part
+      const res = await gmail.users.threads.get({ userId: "me", id, format: "full" });
+      const messages = res.data.messages?.map((message) => {
+        const bodyData =
+          message.payload?.body?.data ||
+          (message.payload?.parts ? findHtmlBody(message.payload.parts) : "") ||
+          message.payload?.parts?.[0]?.body?.data ||
+          ""; // Fallback to first part
 
-      if (!bodyData) {
-        console.log("⚠️ Driver: No email body data found");
-      } else {
-        console.log("✓ Driver: Found email body data");
-      }
+        if (!bodyData) {
+          console.log("⚠️ Driver: No email body data found");
+        } else {
+          console.log("✓ Driver: Found email body data");
+        }
 
-      // Process the body content
-      console.log("🔄 Driver: Processing email body...");
-      const decodedBody = fromBinary(bodyData);
-      // we probably dont need this, testing
-      const processedHtml = "";
+        // Process the body content
+        console.log("🔄 Driver: Processing email body...");
+        const decodedBody = fromBinary(bodyData);
 
-      console.log("✅ Driver: Email processing complete", {
-        hasBody: !!bodyData,
-        hasProcessedHtml: !!processedHtml,
-        processedHtmlLength: processedHtml.length,
-        decodedBodyLength: decodedBody.length,
+        console.log("✅ Driver: Email processing complete", {
+          hasBody: !!bodyData,
+          decodedBodyLength: decodedBody.length,
+        });
+
+        // Create the full email data
+        const parsedData = parse(message);
+        const fullEmailData = {
+          ...parsedData,
+          body: bodyData,
+          processedHtml: "",
+          blobUrl: `data:text/html;charset=utf-8,${encodeURIComponent(decodedBody)}`,
+        };
+
+        // Log the result for debugging
+        console.log("📧 Driver: Returning email data", {
+          id: fullEmailData.id,
+          hasBody: !!fullEmailData.body,
+          hasBlobUrl: !!fullEmailData.blobUrl,
+          blobUrlLength: fullEmailData.blobUrl.length,
+        });
+
+        return fullEmailData;
       });
-
-      // Create the full email data
-      const parsedData = parse(res.data as any);
-      const fullEmailData = {
-        ...parsedData,
-        body: bodyData,
-        processedHtml,
-        blobUrl: `data:text/html;charset=utf-8,${encodeURIComponent(decodedBody)}`,
-      };
-
-      // Log the result for debugging
-      console.log("📧 Driver: Returning email data", {
-        id: fullEmailData.id,
-        hasBody: !!fullEmailData.body,
-        hasProcessedHtml: !!fullEmailData.processedHtml,
-        hasBlobUrl: !!fullEmailData.blobUrl,
-        blobUrlLength: fullEmailData.blobUrl.length,
-      });
-
-      return fullEmailData;
+      return messages;
     },
     create: async (data: any) => {
       const res = await gmail.users.messages.send({ userId: "me", requestBody: data });

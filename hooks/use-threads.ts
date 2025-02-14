@@ -101,7 +101,7 @@ const fetchEmails = async (args: any[]) => {
     baseURL: BASE_URL,
     onSuccess(context) {
       // reversing the order of the messages to make sure the newest ones are at the top
-      threadsCache.bulkPut(context.data.messages, searchParams.toString() + connectionId);
+      // threadsCache.bulkPut(context.data.messages, searchParams.toString() + connectionId);
     },
   }).then((e) => e.data)) as RawResponse;
 };
@@ -114,7 +114,7 @@ const fetchEmailsFromCache = async (args: any[]) => {
   if (folder) searchParams.set("folder", folder.toString());
   if (labelIds) searchParams.set("labelIds", labelIds.join(","));
   const data = await threadsCache.list(searchParams.toString() + connectionId);
-  return { messages: data.reverse() };
+  return { threads: data.reverse() };
 };
 
 const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
@@ -124,12 +124,12 @@ const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
   return await $fetch(`/api/v1/mail/${id}/`, {
     baseURL: BASE_URL,
     onSuccess(context) {
-      threadsCache.update({
-        id,
-        blobUrl: context.data.blobUrl,
-        processedHtml: context.data.processedHtml,
-        body: context.data.body,
-      });
+      // threadsCache.update({
+      //   id,
+      //   blobUrl: context.data.blobUrl,
+      //   processedHtml: context.data.processedHtml,
+      //   body: context.data.body,
+      // });
     },
   }).then((e) => e.data as ParsedMessage);
 };
@@ -137,12 +137,12 @@ const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
 // Based on gmail
 interface RawResponse {
   nextPageToken: number;
-  messages: InitialThread[];
+  threads: InitialThread[];
   resultSizeEstimate: number;
 }
 
 interface ThreadsResponse {
-  messages: ParsedMessage[];
+  threads: ParsedMessage[];
 }
 
 const useCachedThreads = (folder: string, labelIds?: string[], query?: string, max?: number) => {
@@ -167,7 +167,7 @@ export const useThreads = (folder: string, labelIds?: string[], query?: string, 
 
   return {
     data: data ?? cachedThreads,
-    isLoading: cachedThreads?.messages.length ? false : isLoading,
+    isLoading: cachedThreads?.threads.length ? false : isLoading,
     error,
   };
 };

@@ -33,6 +33,7 @@ export interface ParsedMessage {
   id: string;
   connectionId?: string;
   title: string;
+  subject: string;
   tags: string[];
   sender: {
     name: string;
@@ -62,4 +63,6 @@ export interface InitialThread {
   };
   receivedOn: string;
   unread: boolean;
+  subject: string;
+  totalReplies: number;
 }

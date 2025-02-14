@@ -181,7 +181,7 @@ export function Mail({ folder }: MailProps) {
                       ))}
                     </div>
                   ) : (
-                    <MailList items={threadsResponse?.messages || []} />
+                    <MailList items={threadsResponse?.threads || []} />
                   )}
                 </div>
               </div>
