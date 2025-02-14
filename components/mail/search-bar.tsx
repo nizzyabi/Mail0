@@ -8,6 +8,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, SlidersHorizontal, CalendarIcon } from "lucide-react";
 import { useSearchValue } from "@/hooks/use-search-value";
+import { useState, useEffect, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { useDebouncedCallback } from "use-debounce";
@@ -15,18 +16,35 @@ import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format, subDays } from "date-fns";
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { cn } from "@/lib/utils";
 
 const inboxes = ["All Mail", "Inbox", "Drafts", "Sent", "Spam", "Trash", "Archive"];
 
-function DateFilter() {
+function DateFilter({ onDateChange }: { onDateChange: (date: DateRange | undefined) => void }) {
   const [date, setDate] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
+
+  const handleDateSelect = (newDate: DateRange | undefined) => {
+    setDate(newDate);
+    onDateChange(newDate);
+  };
+
+  // Set the number of months to display based on the screen size
+  const [numberOfMonths, setNumberOfMonths] = useState(1);
+
+  useEffect(() => {
+    const updateNumberOfMonths = () => {
+      const isSmallScreen = window.matchMedia("(max-width: 640px)").matches;
+      setNumberOfMonths(isSmallScreen ? 1 : 2);
+    };
+    updateNumberOfMonths();
+    window.addEventListener("resize", updateNumberOfMonths);
+    return () => window.removeEventListener("resize", updateNumberOfMonths);
+  }, []);
 
   return (
     <div className="grid gap-2">
@@ -57,8 +75,8 @@ function DateFilter() {
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
-            numberOfMonths={2}
+            onSelect={handleDateSelect}
+            numberOfMonths={numberOfMonths}
             disabled={(date) => date > new Date()}
           />
         </PopoverContent>
@@ -80,6 +98,7 @@ export function SearchBar() {
     },
   });
 
+  // use debounced search on main search input
   const debouncedMainSearch = useDebouncedCallback((searchQuery: string) => {
     setSearchValue({
       value: searchQuery,
@@ -99,16 +118,6 @@ export function SearchBar() {
 
   // Handler for filter submission
   const handleFilterSubmit = form.handleSubmit((data) => {
-    const formattedDateRange = dateRange
-      ? `${format(dateRange.from!, "yyyy-MM-dd")},${format(dateRange.to!, "yyyy-MM-dd")}`
-      : "";
-
-    console.log(
-      `/api/v1/mail?q=${data.q}&folder=${data.subject || "inbox"}&from=${
-        data.from || ""
-      }&to=${data.to || ""}&dateRange=${formattedDateRange}`,
-    );
-
     setSearchValue({
       value: data.q,
       filters: {
@@ -117,7 +126,20 @@ export function SearchBar() {
       },
     });
     setIsPopoverOpen(false);
+    // const formattedDateRange = dateRange
+    //   ? `${format(dateRange.from!, "yyyy-MM-dd")},${format(dateRange.to!, "yyyy-MM-dd")}`
+    //   : "";
+
+    // console.log(
+    //   `/api/v1/mail?q=${data.q}&folder=${data.subject || "inbox"}&from=${data.from || ""
+    //   }&to=${data.to || ""}&dateRange=${formattedDateRange}`
+    // );
   });
+
+  // Date range change handler
+  const handleDateChange = useCallback((newDateRange: DateRange | undefined) => {
+    setDateRange(newDateRange);
+  }, []);
 
   const resetSearch = () => {
     form.reset();
@@ -217,7 +239,7 @@ export function SearchBar() {
                       <label className="text-xs font-medium text-muted-foreground">
                         Date Range
                       </label>
-                      <DateFilter />
+                      <DateFilter onDateChange={handleDateChange} />
                     </div>
                   </div>
 
