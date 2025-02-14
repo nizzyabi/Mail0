@@ -1,17 +1,19 @@
+import { ContainerScroll } from "../ui/container-scroll-animation";
 import Image from "next/image";
 
 const HeroImage = () => {
   return (
-    <div className="mx-auto mt-8 w-full max-w-5xl overflow-hidden px-4">
-      <div className="relative items-center justify-center rounded-xl border border-muted bg-[#b4b2b21a] p-1 shadow-xl shadow-black backdrop-blur-lg md:flex md:animate-move-up md:p-5">
+    <div className="mx-auto -mt-5 w-full max-w-5xl overflow-hidden px-4 md:-mt-5">
+      <ContainerScroll>
         <Image
           src="/homepage-image.png"
           alt="hero"
-          width={800}
-          height={600}
-          className="h-full w-full rounded-xl shadow-xl shadow-black md:rounded-lg"
+          height={720}
+          width={1400}
+          className="mx-auto h-full rounded-2xl object-cover object-left-top"
+          draggable={false}
         />
-      </div>
+      </ContainerScroll>
     </div>
   );
 };

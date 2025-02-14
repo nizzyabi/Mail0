@@ -72,7 +72,7 @@ export default function Hero() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl animate-fade-in pt-20 md:px-0 md:pt-20">
+    <div className="mx-auto w-full max-w-2xl animate-fade-in pt-5 text-white md:px-0 md:pt-20">
       <Balancer className="px-1 text-center text-5xl font-medium sm:text-7xl md:px-0">
         Your open source email alternative
       </Balancer>
@@ -82,7 +82,7 @@ export default function Hero() {
       </Balancer>
 
       <Card className="mt-3 w-full border-none bg-transparent shadow-none">
-        <CardContent className="px-0">
+        <CardContent className="px-4 md:px-0">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}

@@ -98,6 +98,9 @@ importers:
       drizzle-orm:
         specifier: ^0.39.2
         version: 0.39.2(@types/react@19.0.8)(kysely@0.27.5)(postgres@3.4.5)(react@19.0.0)
+      framer-motion:
+        specifier: ^12.4.2
+        version: 12.4.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       googleapis:
         specifier: ^144.0.0
         version: 144.0.0
