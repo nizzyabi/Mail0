@@ -1,0 +1,12 @@
+{
+  "name": "@mail0/tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./tailwind.config.ts"
+  },
+  "devDependencies": {
+    "@mail0/tsconfig": "workspace:*",
+    "tailwindcss": "^3.4.17"
+  }
+}
