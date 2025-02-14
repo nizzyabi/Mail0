@@ -7,7 +7,7 @@ import { idb } from "@/lib/idb";
 
 export const preloadThread = (userId: string, threadId: string) => {
   console.log(`🔄 Prefetching email ${threadId}...`);
-  preload([userId, threadId], fetchEmail);
+  preload([userId, threadId], fetchThread);
 };
 
 const threadsCache = {
@@ -117,7 +117,7 @@ const fetchEmailsFromCache = async (args: any[]) => {
   return { threads: data.reverse() };
 };
 
-const fetchEmail = async (args: any[]): Promise<ParsedMessage[]> => {
+const fetchThread = async (args: any[]): Promise<ParsedMessage[]> => {
   const [_, id] = args;
   // const existing = await threadsCache.get(id);
   // if (existing?.blobUrl) return existing as ParsedMessage[];
@@ -174,9 +174,9 @@ export const useThreads = (folder: string, labelIds?: string[], query?: string, 
 
 export const useThread = (id: string) => {
   const { data: session } = useSession();
-  const { data, isLoading, error } = useSWR<ParsedMessage>(
+  const { data, isLoading, error } = useSWR<ParsedMessage[]>(
     session?.user.id ? [session.user.id, id, session.connectionId] : null,
-    fetchEmail,
+    fetchThread,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
