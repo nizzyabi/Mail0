@@ -36,7 +36,7 @@ export default function TermsOfService() {
           </CardHeader>
 
           <div className="space-y-6 px-6 pb-6">
-            {sections.map((section, index) => (
+            {sections.map((section) => (
               <div
                 key={section.title}
                 className="group rounded-xl border bg-card/50 p-6 shadow-sm transition-all hover:bg-card/80"
@@ -83,7 +83,7 @@ const sections = [
           <ul className="ml-4 list-disc space-y-2">
             <li>Mail0.io provides software that users can deploy on their own infrastructure</li>
             <li>Users are responsible for their own hosting, maintenance, and compliance</li>
-            <li>The software is provided "as is" under the MIT License</li>
+            <li>The software is provided &quot;as is&quot; under the MIT License</li>
           </ul>
         </div>
         <div>
@@ -92,7 +92,7 @@ const sections = [
           </h3>
           <ul className="ml-4 list-disc space-y-2">
             <li>Mail0.io can integrate with third-party email providers</li>
-            <li>Users must comply with third-party providers' terms of service</li>
+            <li>Users must comply with third-party providers&apos; terms of service</li>
             <li>We are not responsible for third-party service disruptions</li>
           </ul>
         </div>

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { connection, user as _user, account } from "@/db/schema";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth, BetterAuthOptions } from "better-auth";
-import { connection, user as _user } from "@/db/schema";
 import { customSession } from "better-auth/plugins";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { env } from "./env";
@@ -18,6 +19,11 @@ const options = {
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  advanced: {
+    ipAddress: {
+      disableIpTracking: true,
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day (every 1 day the session expiration is updated)
@@ -33,7 +39,7 @@ const options = {
     },
   },
   emailAndPassword: {
-    enabled: true,
+    enabled: false,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await resend.emails.send({
@@ -50,7 +56,7 @@ const options = {
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, token }) => {
       const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/api/auth/verify-email?token=${token}&callbackURL=/connect-emails`;
@@ -82,6 +88,37 @@ const options = {
           .from(connection)
           .where(eq(connection.userId, user.id))
           .limit(1);
+        if (!defaultConnection) {
+          // find the user account the user has
+          const [userAccount] = await db
+            .select()
+            .from(account)
+            .where(eq(account.userId, user.id))
+            .limit(1);
+          if (userAccount) {
+            // create a new connection
+            const [newConnection] = await db.insert(connection).values({
+              id: randomUUID(),
+              userId: user.id,
+              email: user.email,
+              name: user.name,
+              picture: user.image,
+              accessToken: userAccount.accessToken,
+              refreshToken: userAccount.refreshToken,
+              scope: userAccount.scope,
+              providerId: userAccount.providerId,
+              expiresAt: new Date(
+                Date.now() + (userAccount.accessTokenExpiresAt?.getTime() || 3600000),
+              ),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            } as any);
+            // this type error is pissing me tf off
+            if (newConnection) {
+              console.log("Created new connection for user", newConnection);
+            }
+          }
+        }
         return {
           connectionId: defaultConnection ? defaultConnection.id : null,
           user,

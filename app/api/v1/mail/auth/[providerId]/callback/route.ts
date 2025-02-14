@@ -60,7 +60,6 @@ export async function GET(
 
     return NextResponse.redirect(new URL("/connect-emails?success=true", request.url));
   } catch (error) {
-    console.error("Callback error:", error);
-    return new NextResponse(JSON.stringify({ error: true }));
+    return new NextResponse(JSON.stringify({ error }));
   }
 }

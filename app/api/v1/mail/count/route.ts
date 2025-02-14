@@ -10,7 +10,7 @@ export const GET = async ({ headers }: NextRequest) => {
   if (!session) return new Response("Unauthorized", { status: 401 });
   const [foundAccount] = await db.select().from(account).where(eq(account.userId, session.user.id));
   if (!foundAccount?.accessToken || !foundAccount.refreshToken)
-    return new Response("Unauthorized, reconnect", { status: 402 });
+    return new Response("Unauthorized, reconnect", { status: 401 });
   const driver = await createDriver(foundAccount.providerId, {
     auth: {
       access_token: foundAccount.accessToken,

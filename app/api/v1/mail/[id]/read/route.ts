@@ -21,7 +21,7 @@ export const POST = async (
     .where(and(eq(connection.userId, session.user.id), eq(connection.id, session.connectionId)));
 
   if (!_connection?.accessToken || !_connection.refreshToken)
-    return new Response("Unauthorized, reconnect", { status: 402 });
+    return new Response("Unauthorized, reconnect", { status: 401 });
 
   const driver = await createDriver(_connection.providerId, {
     // Assuming "google" is the provider ID

@@ -31,12 +31,18 @@ export default function PrivacyPolicy() {
           <CardHeader className="space-y-4">
             <div className="space-y-2 text-center">
               <CardTitle className="text-4xl font-bold tracking-tight">Privacy Policy</CardTitle>
-              <p className="text-sm text-muted-foreground">Last updated: {LAST_UPDATED}</p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-sm text-muted-foreground">Last updated: {LAST_UPDATED}</p>
+                <span className="text-sm text-muted-foreground">•</span>
+                <a href="/terms" className="text-sm">
+                  Terms of Service
+                </a>
+              </div>
             </div>
           </CardHeader>
 
           <div className="space-y-6 px-6 pb-6">
-            {sections.map((section, index) => (
+            {sections.map((section) => (
               <div
                 key={section.title}
                 className="group rounded-xl border bg-card/50 p-6 shadow-sm transition-all hover:bg-card/80"
@@ -69,8 +75,8 @@ const sections = [
     content: (
       <p>
         At Mail0.io, we believe that privacy is a fundamental right. Our open-source email solution
-        is built with privacy at its core, and we're committed to being transparent about how we
-        handle your data.
+        is built with privacy at its core, and we&apos;re committed to being transparent about how
+        we handle your data.
       </p>
     ),
   },
@@ -100,7 +106,9 @@ const sections = [
           <h3 className="mb-3 text-lg font-medium">Google Services Data Handling</h3>
           <ul className="ml-4 list-disc space-y-2">
             <li>Email data is processed in accordance with Google API Services User Data Policy</li>
-            <li>We only process and display email data - we don't store copies of your emails</li>
+            <li>
+              We only process and display email data - we don&apos;t store copies of your emails
+            </li>
             <li>
               All data transmission between our service and Google is encrypted using
               industry-standard protocols
