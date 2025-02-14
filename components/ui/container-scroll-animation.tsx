@@ -40,7 +40,6 @@ export const ContainerScroll = ({ children }: { children: React.ReactNode }) => 
 export const Card = ({
   rotate,
   scale,
-  translate,
   children,
 }: {
   rotate: MotionValue<number>;
