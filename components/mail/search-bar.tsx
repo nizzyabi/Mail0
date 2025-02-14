@@ -14,8 +14,8 @@ import { useDebouncedCallback } from "use-debounce";
 import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { cn } from "@/lib/utils";
@@ -80,30 +80,42 @@ export function SearchBar() {
     },
   });
 
-  const submitSearch = useDebouncedCallback(
-    (data: { subject: string; from: string; to: string; q: string }) => {
-      setSearchValue({
-        value: data.q,
-        filters: {
-          ...data,
-          dateRange,
-        },
-      });
-    },
-    300,
-    { maxWait: 2000 },
-  );
+  const debouncedMainSearch = useDebouncedCallback((searchQuery: string) => {
+    setSearchValue({
+      value: searchQuery,
+      filters: form.getValues(), // Keep existing filters
+    });
+  }, 300);
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  // Watch form and trigger search
   useEffect(() => {
-    const subscription = form.watch((data) => {
-      submitSearch(data as { subject: string; from: string; to: string; q: string });
+    const subscription = form.watch(({ q }) => {
+      if (q !== undefined) {
+        debouncedMainSearch(q);
+      }
     });
     return () => subscription.unsubscribe();
-  }, [form, form.watch, submitSearch]);
+  }, [form, form.watch, debouncedMainSearch]);
 
-  const handleSubmit = form.handleSubmit((data) => {
-    submitSearch(data);
+  // Handler for filter submission
+  const handleFilterSubmit = form.handleSubmit((data) => {
+    const formattedDateRange = dateRange
+      ? `${format(dateRange.from!, "yyyy-MM-dd")},${format(dateRange.to!, "yyyy-MM-dd")}`
+      : "";
+
+    console.log(
+      `/api/v1/mail?q=${data.q}&folder=${data.subject || "inbox"}&from=${
+        data.from || ""
+      }&to=${data.to || ""}&dateRange=${formattedDateRange}`,
+    );
+
+    setSearchValue({
+      value: data.q,
+      filters: {
+        ...data,
+        dateRange,
+      },
+    });
     setIsPopoverOpen(false);
   });
 
@@ -111,11 +123,12 @@ export function SearchBar() {
     form.reset();
     setDateRange(undefined);
     setSearchValue({ value: "", filters: {} });
+    setIsPopoverOpen(false);
   };
 
   return (
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
-      <form onSubmit={handleSubmit} className="relative flex items-center">
+      <form onSubmit={handleFilterSubmit} className="relative flex items-center">
         <Form {...form}>
           <Search
             className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
