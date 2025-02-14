@@ -215,7 +215,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
         </div>
 
         <div className="space-y-6">
-          {emailData?.thread?.map((message, index) => (
+          {emailData?.map((message, index) => (
             <div
               key={message.id + index}
               className={cn(
@@ -240,7 +240,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
                 <div className="flex items-center gap-2">
                   <Reply className="h-4 w-4" />
                   <p className="truncate">
-                    {emailData?.sender.name} ({emailData?.sender.email})
+                    {emailData[0]?.sender?.name} ({emailData[0]?.sender?.email})
                   </p>
                 </div>
               </div>
