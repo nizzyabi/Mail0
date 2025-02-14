@@ -175,7 +175,7 @@ export function NavUser() {
           </>
         ) : (
           <>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/signin")}>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/login")}>
               <LogIn size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Sign in
             </DropdownMenuItem>
