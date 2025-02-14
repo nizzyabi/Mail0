@@ -1,21 +1,55 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { checkConnections, type Connection } from "@/lib/connections-count";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { signIn } from "@/lib/auth-client";
+import { Mail } from "lucide-react";
 import { toast } from "sonner";
 
-export default function Login() {
+// Client Component that handles routing and rendering
+function LoginCard({ connections }: { connections: Connection[] }) {
+  const router = useRouter();
+
   return (
-    <div className="flex h-dvh w-screen items-center justify-center bg-background">
-      <Card className="w-full max-w-md border-none shadow-none">
-        <CardHeader className="py-5">
-          <CardTitle className="text-center">Log into your Mail0 account</CardTitle>
-          <p className="text-center text-sm text-gray-500 dark:text-zinc-400">
-            Login to your account to continue
-          </p>
-        </CardHeader>
-        <CardContent>
+    <Card className="w-full max-w-md border-none shadow-none">
+      <CardHeader className="py-5">
+        <CardTitle className="text-center">
+          {connections.length > 0 ? "Welcome back!" : "Log into your Mail0 account"}
+        </CardTitle>
+        <p className="text-center text-sm text-gray-500 dark:text-zinc-400">
+          {connections.length > 0 ? "Continue to your inbox" : "Login to your account to continue"}
+        </p>
+      </CardHeader>
+      <CardContent>
+        {connections.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => {
+                toast.promise(Promise.resolve(router.push("/mail")), {
+                  loading: "Redirecting to mail...",
+                  success: "Welcome back!",
+                  error: "Failed to navigate",
+                });
+              }}
+              className="w-full"
+              type="button"
+            >
+              <Mail className="h-4 w-4" />
+              Continue to Mail
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className="w-full"
+              type="button"
+            >
+              Use different account
+            </Button>
+          </div>
+        ) : (
           <div className="flex max-w-md justify-center gap-2">
             <Button
               onClick={async () => {
@@ -50,8 +84,32 @@ export default function Login() {
               GitHub
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Login() {
+  const [connections, setConnections] = useState<Connection[] | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchConnections = async () => {
+      try {
+        const result = await checkConnections();
+        setConnections(result);
+      } catch (error) {
+        console.error("Connection check error:", error);
+        setConnections([]);
+      }
+    };
+
+    fetchConnections();
+  }, []);
+
+  return (
+    <div className="flex h-dvh w-screen items-center justify-center bg-background">
+      {connections === undefined ? "" : <LoginCard connections={connections} />}
     </div>
   );
 }
