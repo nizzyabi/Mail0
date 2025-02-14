@@ -1,37 +1,23 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { checkConnections, type Connection } from "@/lib/connections-count";
+import { signIn, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { signIn } from "@/lib/auth-client";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function Login() {
   const router = useRouter();
-  const [connections, setConnections] = useState<Connection[] | undefined>(undefined);
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
-    const fetchConnections = async () => {
-      try {
-        const result = await checkConnections();
-        setConnections(result);
+    if (!isPending && session?.connectionId) {
+      router.push("/mail");
+    }
+  }, [session, isPending, router]);
 
-        if (result.length > 0) {
-          router.push("/mail");
-        }
-      } catch (error) {
-        console.error("Connection check error:", error);
-        setConnections([]);
-      }
-    };
-
-    fetchConnections();
-  }, [router]);
-
-  // Only render the card if there are no connections
-  if (connections === undefined || connections.length > 0) return null;
+  if (isPending || (session && session.connectionId)) return null;
 
   return (
     <div className="flex h-dvh w-screen items-center justify-center bg-background">
