@@ -1,6 +1,6 @@
 "use client";
 
-import { AlignVerticalSpaceAround, ListFilter, SquarePen } from "lucide-react";
+import { AlignVerticalSpaceAround, Check, ListFilter, SquarePen } from "lucide-react";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import * as React from "react";
 
@@ -21,13 +21,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
-import { useFilteredMails } from "@/hooks/use-filtered-mails";
 import { useMediaQuery } from "../../hooks/use-media-query";
-import { tagsAtom } from "@/components/mail/use-tags";
+import { useSearchValue } from "@/hooks/use-search-value";
 import { SidebarToggle } from "../ui/sidebar-toggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type Mail } from "@/components/mail/data";
+import { useSearchParams } from "next/navigation";
+import { useThreads } from "@/hooks/use-threads";
 import { SearchBar } from "./search-bar";
-import { useAtomValue } from "jotai";
 
 interface MailProps {
   accounts: {
@@ -35,26 +36,44 @@ interface MailProps {
     email: string;
     icon: React.ReactNode;
   }[];
-  mails: Mail[];
+  folder: string;
   defaultLayout: number[] | undefined;
   defaultCollapsed?: boolean;
   navCollapsedSize: number;
   muted?: boolean;
 }
 
-export function Mail({ mails }: MailProps) {
+export function Mail({ folder }: MailProps) {
+  const [searchValue] = useSearchValue();
   const [mail, setMail] = useMail();
   const [isCompact, setIsCompact] = React.useState(false);
-  const tags = useAtomValue(tagsAtom);
-  const activeTags = tags.filter((tag) => tag.checked);
+  const searchParams = useSearchParams();
 
-  const filteredMails = useFilteredMails(mails, activeTags);
-
-  const [, setIsDialogOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [filterValue, setFilterValue] = useState<"all" | "unread">("all");
+  const labels = useMemo(() => {
+    if (filterValue === "all") {
+      if (searchParams.has("category")) {
+        return [`CATEGORY_${searchParams.get("category")!.toUpperCase()}`];
+      }
+      return undefined;
+    }
+    if (filterValue) {
+      if (searchParams.has("category")) {
+        return [
+          filterValue.toUpperCase(),
+          `CATEGORY_${searchParams.get("category")!.toUpperCase()}`,
+        ];
+      }
+      return [filterValue.toUpperCase()];
+    }
+    return undefined;
+  }, [filterValue, searchParams]);
+  const { data: threadsResponse, isLoading } = useThreads(folder, labels, searchValue.value);
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const [isTransitioning, setIsTransitioning] = useState(true);
 
   // Check if we're on mobile on mount and when window resizes
   React.useEffect(() => {
@@ -76,15 +95,22 @@ export function Mail({ mails }: MailProps) {
     }
   }, [mail.selected]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setIsTransitioning(true);
+    }
+  }, [isLoading]);
+
   const handleClose = useCallback(() => {
     setOpen(false);
     setMail({ selected: null });
   }, [setMail]);
-
-  const selectedMail = useMemo(
-    () => filteredMails.find((item) => item.id === mail.selected) || null,
-    [filteredMails, mail.selected],
-  );
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -122,10 +148,10 @@ export function Mail({ mails }: MailProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setFilterValue("all")}>
-                            All mail
+                            All mail {filterValue === "all" && <Check />}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setFilterValue("unread")}>
-                            Unread
+                            Unread {filterValue === "unread" && <Check />}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -135,26 +161,27 @@ export function Mail({ mails }: MailProps) {
                 </div>
 
                 <div className="h-[calc(100svh-(8px+8px+6px+47px-2px))] overflow-scroll rounded-b-sm bg-background">
-                  {filterValue === "all" ? (
-                    filteredMails.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        No messages found | Clear filters to see more results
-                      </div>
-                    ) : (
-                      <MailList
-                        items={filteredMails}
-                        isCompact={isCompact}
-                        onMailClick={() => setIsDialogOpen(true)}
-                      />
-                    )
-                  ) : filteredMails.filter((item) => !item.read).length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground">No unread messages</div>
+                  {isLoading || isTransitioning ? (
+                    <div className="flex flex-col">
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} className="flex flex-col border-b px-4 py-4">
+                          <div className="flex w-full items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Skeleton className="h-4 w-24" />
+                            </div>
+                            <Skeleton className="h-3 w-12" />
+                          </div>
+                          <Skeleton className="mt-2 h-3 w-32" />
+                          <Skeleton className="mt-2 h-3 w-full" />
+                          <div className="mt-2 flex gap-2">
+                            <Skeleton className="h-5 w-16 rounded-md" />
+                            <Skeleton className="h-5 w-16 rounded-md" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
-                    <MailList
-                      items={filteredMails.filter((item) => !item.read)}
-                      isCompact={isCompact}
-                      onMailClick={() => setIsDialogOpen(true)}
-                    />
+                    <MailList items={threadsResponse?.messages || []} />
                   )}
                 </div>
               </div>
@@ -166,7 +193,7 @@ export function Mail({ mails }: MailProps) {
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
                 <div className="hidden h-full flex-1 overflow-y-auto md:block">
-                  <MailDisplay mail={selectedMail} onClose={handleClose} />
+                  <MailDisplay mail={mail.selected} onClose={handleClose} />
                 </div>
               </ResizablePanel>
             </>
@@ -181,7 +208,7 @@ export function Mail({ mails }: MailProps) {
                 <DrawerTitle>Email Details</DrawerTitle>
               </DrawerHeader>
               <div className="flex h-full flex-col overflow-hidden">
-                <MailDisplay mail={selectedMail} onClose={handleClose} isMobile={true} />
+                <MailDisplay mail={mail.selected} onClose={handleClose} isMobile={true} />
               </div>
             </DrawerContent>
           </Drawer>

@@ -8,13 +8,14 @@ import {
   ReplyAll,
   BellOff,
   X,
-  Lock,
   Send,
   FileIcon,
+  Copy,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -22,8 +23,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Mail } from "@/components/mail/data";
-import { format } from "date-fns/format";
+import { useThread } from "@/hooks/use-threads";
 import { useMail } from "./use-mail";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ import Image from "next/image";
 import React from "react";
 
 interface MailDisplayProps {
-  mail: Mail | null;
+  mail: string | null;
   onClose?: () => void;
   isMobile?: boolean;
 }
@@ -43,9 +43,11 @@ type FormInputs = {
 
 export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
   const [, setMail] = useMail();
-  const [currentMail, setCurrentMail] = useState<Mail | null>(mail);
+  const { data: emailData, isLoading } = useThread(mail ?? "");
   const [isMuted, setIsMuted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
     register,
@@ -67,14 +69,10 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
   const onSubmit: SubmitHandler<FormInputs> = (data) => console.log(data);
 
   useEffect(() => {
-    setCurrentMail(mail);
-  }, [mail]);
-
-  useEffect(() => {
-    if (currentMail) {
-      setIsMuted(currentMail.muted ?? false);
+    if (emailData) {
+      setIsMuted(emailData.unread ?? false);
     }
-  }, [currentMail]);
+  }, [emailData]);
 
   const handleClose = useCallback(() => {
     onClose?.();
@@ -131,11 +129,29 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
     return `${name.slice(0, maxLength)}...`;
   };
 
-  if (!currentMail) return null;
+  const handleCopy = async () => {
+    if (emailData) {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(emailData, null, 2));
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    }
+  };
+
+  if (!emailData) return <div>Loading...</div>;
 
   return (
     <div className="flex h-full flex-col">
-      <div className={cn("flex h-full flex-col", isMobile ? "" : "rounded-r-lg pt-[6px]")}>
+      <div
+        className={cn(
+          "flex h-full flex-col transition-all duration-300",
+          isMobile ? "" : "rounded-r-lg pt-[6px]",
+          isFullscreen ? "fixed inset-0 z-50 bg-background" : "",
+        )}
+      >
         <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background/95 px-4 pb-[7.5px] pt-[0.5px] backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex flex-1 items-center gap-2">
             {!isMobile && (
@@ -144,7 +160,7 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
                   <Button
                     variant="ghost"
                     className="md:h-fit md:px-2"
-                    disabled={!currentMail}
+                    disabled={!emailData}
                     onClick={handleClose}
                   >
                     <X className="h-4 w-4" />
@@ -154,14 +170,50 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
                 <TooltipContent>Close</TooltipContent>
               </Tooltip>
             )}
-            <div className="flex-1 truncate text-sm font-medium">
-              {currentMail?.subject || "No message selected"}
+            <div className="max-w-[300px] flex-1 truncate text-sm font-medium">
+              {emailData.title || "No subject"}
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!currentMail}>
+                <Button
+                  variant="ghost"
+                  className="md:h-fit md:px-2"
+                  disabled={!emailData}
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="md:h-fit md:px-2"
+                  disabled={!emailData}
+                  onClick={handleCopy}
+                >
+                  <Copy className="h-4 w-4" />
+                  <span className="sr-only">Copy email data</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{copySuccess ? "Copied!" : "Copy email data"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!emailData}>
                   <Archive className="h-4 w-4" />
                   <span className="sr-only">Archive</span>
                 </Button>
@@ -170,7 +222,7 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!currentMail}>
+                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!emailData}>
                   <Reply className="h-4 w-4" />
                   <span className="sr-only">Reply</span>
                 </Button>
@@ -179,14 +231,14 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             </Tooltip>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!currentMail}>
+                <Button variant="ghost" className="md:h-fit md:px-2" disabled={!emailData}>
                   <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">More</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  <ArchiveX className="mr-2 h-4 w-4" /> Move to junk
+                  <ArchiveX className="mr-2 h-4 w-4" /> Move to spam
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <ReplyAll className="mr-2 h-4 w-4" /> Reply all
@@ -201,71 +253,29 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             </DropdownMenu>
           </div>
         </div>
-
-        <div className="relative flex-1 overflow-hidden bg-background">
-          <div className="absolute inset-0 overflow-y-auto">
+        <div
+          className={cn(
+            "relative flex-1 overflow-hidden bg-background",
+            isFullscreen && "h-[calc(100vh-4rem)]",
+          )}
+        >
+          <div className="relative inset-0 h-full overflow-y-auto pb-0">
             <div className="flex flex-col gap-4 px-4 py-4">
               <div className="flex items-start gap-3">
                 <Avatar>
-                  <AvatarImage alt={currentMail.name} />
+                  <AvatarImage alt={emailData.sender.name} />
                   <AvatarFallback>
-                    {currentMail.name
+                    {emailData.sender.name
                       .split(" ")
                       .map((chunk) => chunk[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
-                  <div className="font-semibold">{currentMail.name}</div>
+                  <div className="font-semibold">{emailData.sender.name}</div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <span>{currentMail.email}</span>
+                    <span>{emailData.sender.email}</span>
                     {isMuted && <BellOff className="h-4 w-4" />}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <time className="text-xs text-muted-foreground">
-                      {format(new Date(currentMail.date), "PPp")}
-                    </time>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs underline">
-                          Details
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[280px] space-y-2" align="start">
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">From:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">Reply-To:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">To:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">Cc:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">Date:</span>{" "}
-                          {format(new Date(currentMail.date), "PPpp")}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">Mailed-By:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="text-xs">
-                          <span className="font-medium text-muted-foreground">Signed-By:</span>{" "}
-                          {currentMail.email}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs">
-                          <span className="font-medium text-muted-foreground">Security:</span>{" "}
-                          <Lock className="h-3 w-3" /> {currentMail.email}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
                   </div>
                 </div>
               </div>
@@ -274,154 +284,176 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             <Separator />
 
             <div className="h-[calc(100%-128px)] w-full p-0">
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">{currentMail.text}</div>
-            </div>
-          </div>
-
-          <div className="group absolute bottom-0 left-0 right-0 z-10">
-            <div className="absolute bottom-0 left-0 right-0 flex h-8 cursor-pointer items-center justify-center bg-gradient-to-t from-background to-transparent">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground">
-                <Reply className="h-4 w-4" />
-                <span>Reply to email</span>
-              </div>
-            </div>
-
-            <form
-              className={cn(
-                "relative mx-4 mb-4 space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm transition-all duration-200 ease-in-out",
-                replyText === "" && (!attachmentField || attachmentField.length === 0)
-                  ? "invisible translate-y-full opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
-                  : "visible translate-y-0 opacity-100",
-              )}
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Reply className="h-4 w-4" />
-                  <p className="truncate">
-                    {currentMail?.name} ({currentMail?.email})
-                  </p>
-                </div>
-              </div>
-
-              <Textarea
-                className="min-h-[120px] w-full resize-none border-0 leading-relaxed placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-[#18181A] md:text-base"
-                placeholder="Write your reply..."
-                spellCheck={true}
-                {...register("replyText")}
-              />
-
-              {((attachmentField && attachmentField.length > 0) || isUploading) && (
-                <div className="relative z-50 min-h-[32px]">
-                  <div className="hide-scrollbar absolute inset-x-0 flex gap-2 overflow-x-auto">
-                    {isUploading && (
-                      <Badge
-                        variant="secondary"
-                        className="inline-flex shrink-0 animate-pulse items-center bg-background/50 px-2 py-1.5 text-xs"
-                      >
-                        Uploading...
-                      </Badge>
+              <div className="flex h-full w-full flex-1 flex-col p-0">
+                {emailData.blobUrl ? (
+                  <iframe
+                    key={emailData.id}
+                    src={emailData.blobUrl}
+                    className={cn(
+                      "w-full flex-1 border-none transition-opacity duration-200",
+                      isLoading ? "opacity-50" : "opacity-100",
                     )}
-                    {attachmentField &&
-                      Array.from(attachmentField).map((file, index) => (
-                        <Tooltip key={index}>
-                          <TooltipTrigger asChild>
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="inline-flex shrink-0 items-center gap-1 bg-background/50 px-2 py-1.5 text-xs"
-                            >
-                              <span className="max-w-[120px] truncate">
-                                {truncateFileName(file.name)}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="ml-1 h-4 w-4 hover:bg-background/80"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  removeAttachment(index);
-                                }}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent className="w-64 p-0">
-                            <div className="relative h-32 w-full">
-                              {file.type.startsWith("image/") ? (
-                                <Image
-                                  src={URL.createObjectURL(file) || "/placeholder.svg"}
-                                  alt={file.name}
-                                  fill
-                                  className="rounded-t-md object-cover"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center p-4">
-                                  <FileIcon className="h-16 w-16 text-primary" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="bg-secondary p-2">
-                              <p className="text-sm font-medium">
-                                {truncateFileName(file.name, 30)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Size: {(file.size / (1024 * 1024)).toFixed(2)} MB
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Last modified: {new Date(file.lastModified).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        className="h-8 w-8 hover:bg-background/80"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          document.getElementById("attachment-input")?.click();
-                        }}
-                      >
-                        <Paperclip className="h-4 w-4" />
-                        <span className="sr-only">Add attachment</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Attach file</TooltipContent>
-                  </Tooltip>
-                  <input
-                    type="file"
-                    className="hidden"
-                    id="attachment-input"
-                    multiple
-                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
-                    {...register("attachments", {
-                      onChange: handleAttachment,
-                    })}
+                    title="Email Content"
+                    sandbox="allow-same-origin"
+                    style={{
+                      minHeight: "500px",
+                      height: "100%",
+                      overflow: "auto",
+                    }}
                   />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" className="h-8">
-                    Save draft
-                  </Button>
-                  <Button size="sm" className="h-8">
-                    Send <Send className="ml-2 h-3 w-3" />
-                  </Button>
+                ) : (
+                  <div
+                    className="flex h-[500px] w-full items-center justify-center"
+                    style={{ minHeight: "500px" }}
+                  >
+                    <div className="h-32 w-32 animate-pulse rounded-full bg-secondary" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="group absolute bottom-0 left-0 right-0 z-10">
+          <div className="absolute bottom-0 left-0 right-0 flex h-8 cursor-pointer items-center justify-center bg-gradient-to-t from-background to-transparent">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground">
+              <Reply className="h-4 w-4" />
+              <span>Reply to email</span>
+            </div>
+          </div>
+
+          <form
+            className={cn(
+              "relative mx-4 mb-4 space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm transition-all duration-200 ease-in-out",
+              replyText === "" && (!attachmentField || attachmentField.length === 0)
+                ? "invisible translate-y-full opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+                : "visible translate-y-0 opacity-100",
+            )}
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Reply className="h-4 w-4" />
+                <p className="truncate">
+                  {emailData?.sender.name} ({emailData?.sender.email})
+                </p>
+              </div>
+            </div>
+
+            <Textarea
+              className="min-h-[60px] w-full resize-none border-0 bg-[#18181A] leading-relaxed placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-base"
+              placeholder="Write your reply..."
+              spellCheck={true}
+              {...register("replyText")}
+            />
+
+            {((attachmentField && attachmentField.length > 0) || isUploading) && (
+              <div className="relative z-50 min-h-[32px]">
+                <div className="hide-scrollbar absolute inset-x-0 flex gap-2 overflow-x-auto">
+                  {isUploading && (
+                    <Badge
+                      variant="secondary"
+                      className="inline-flex shrink-0 animate-pulse items-center bg-background/50 px-2 py-1.5 text-xs"
+                    >
+                      Uploading...
+                    </Badge>
+                  )}
+                  {attachmentField &&
+                    Array.from(attachmentField).map((file, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="inline-flex shrink-0 items-center gap-1 bg-background/50 px-2 py-1.5 text-xs"
+                          >
+                            <span className="max-w-[120px] truncate">
+                              {truncateFileName(file.name)}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="ml-1 h-4 w-4 hover:bg-background/80"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                removeAttachment(index);
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent className="w-64 p-0">
+                          <div className="relative h-32 w-full">
+                            {file.type.startsWith("image/") ? (
+                              <Image
+                                src={URL.createObjectURL(file) || "/placeholder.svg"}
+                                alt={file.name}
+                                fill
+                                className="rounded-t-md object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center p-4">
+                                <FileIcon className="h-16 w-16 text-primary" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="bg-secondary p-2">
+                            <p className="text-sm font-medium">{truncateFileName(file.name, 30)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Size: {(file.size / (1024 * 1024)).toFixed(2)} MB
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Last modified: {new Date(file.lastModified).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
                 </div>
               </div>
-            </form>
-          </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className="h-8 w-8 hover:bg-background/80"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById("attachment-input")?.click();
+                      }}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      <span className="sr-only">Add attachment</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Attach file</TooltipContent>
+                </Tooltip>
+                <input
+                  type="file"
+                  className="hidden"
+                  id="attachment-input"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  {...register("attachments", {
+                    onChange: handleAttachment,
+                  })}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="h-8">
+                  Save draft
+                </Button>
+                <Button size="sm" className="h-8">
+                  Send <Send className="ml-2 h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

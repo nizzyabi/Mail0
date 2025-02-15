@@ -4,7 +4,7 @@
  */
 
 import { Ratelimit } from "@upstash/ratelimit";
-import { redis } from "@/helpers/redis";
+import { redis } from "@/lib/redis";
 
 const RATE_LIMIT_TIME_FRAME = 24 * 60 * 60 * 1000; // 24 hours
 const RATE_LIMIT_MAX_REQUESTS = 5; // Max 5 requests per IP per time frame
