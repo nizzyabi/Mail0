@@ -26,27 +26,25 @@ const Thread = ({ message: initialMessage }: { message: InitialThread }) => {
 
   const isMailSelected = useMemo(() => message.id === mail.selected, [message.id, mail.selected]);
 
-  const highlightText = useMemo(() => {
-    return (text: string, highlight: string) => {
-      if (!highlight?.trim()) return text;
+  const highlightText = (text: string, highlight: string) => {
+    if (!highlight?.trim()) return text;
 
-      const regex = new RegExp(`(${highlight})`, "gi");
-      const parts = text.split(regex);
+    const regex = new RegExp(`(${highlight})`, "gi");
+    const parts = text.split(regex);
 
-      return parts.map((part, i) => {
-        return i % 2 === 1 ? (
-          <span
-            key={i}
-            className="ring-0.5 mx-0.5 inline-flex items-center justify-center rounded bg-black px-1 py-0.5 text-white ring-yellow-300/70 dark:bg-white dark:text-black dark:ring-yellow-300/50"
-          >
-            {part}
-          </span>
-        ) : (
-          part
-        );
-      });
-    };
-  }, []);
+    return parts.map((part, i) => {
+      return i % 2 === 1 ? (
+        <span
+          key={i}
+          className="ring-0.5 mx-0.5 inline-flex items-center justify-center rounded bg-black px-1 py-0.5 text-white ring-yellow-300/70 dark:bg-white dark:text-black dark:ring-yellow-300/50"
+        >
+          {part}
+        </span>
+      ) : (
+        part
+      );
+    });
+  };
 
   const handleMailClick = async () => {
     if (isMailSelected) {
