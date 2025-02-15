@@ -40,7 +40,7 @@ export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
   const { setTheme, theme } = useTheme();
-  const { data: connections, isLoading } = useConnections();
+  const { data: connections, isLoading, mutate } = useConnections();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
@@ -56,11 +56,48 @@ export function NavUser() {
         },
       })
       .then(refetch)
+      .then(() => mutate())
       .catch((err) => {
         toast.error("Error switching connection", {
           description: err.response.data.message,
         });
       });
+  };
+
+  const handleLogout = () => {
+    if (!session) return;
+
+    const remainingConnections = connections?.filter(
+      (connection) => connection.id !== session.connectionId,
+    );
+
+    if (remainingConnections?.length) {
+      // Delete current connection and switch to the next
+      return axios
+        .delete(`/api/v1/mail/connections/${session.connectionId}`)
+        .then(() => handleAccountSwitch(remainingConnections[0])())
+        .catch((err) => {
+          toast.error("Error logging out", {
+            description: err.response?.data?.message,
+          });
+        });
+    } else {
+      // No remaining accounts, delete connection and proceed with full better-auth sign out
+      return toast.promise(
+        axios.delete(`/api/v1/mail/connections/${session.connectionId}`).then(() =>
+          signOut({
+            fetchOptions: {
+              onSuccess: () => router.push("/"),
+            },
+          }),
+        ),
+        {
+          loading: "Signing out...",
+          success: "Signed out successfully!",
+          error: "Error signing out",
+        },
+      );
+    }
   };
 
   return (
@@ -150,25 +187,7 @@ export function NavUser() {
               <Cog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={async () => {
-                toast.promise(
-                  signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        router.push("/");
-                      },
-                    },
-                  }),
-                  {
-                    loading: "Signing out...",
-                    success: () => "Signed out successfully!",
-                    error: "Error signing out",
-                  },
-                );
-              }}
-            >
+            <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
               <LogOut size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Log out
             </DropdownMenuItem>

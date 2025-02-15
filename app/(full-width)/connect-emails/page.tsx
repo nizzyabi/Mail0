@@ -53,14 +53,14 @@ export default function ConnectEmails() {
 
   return (
     <div className="flex h-dvh w-screen items-center justify-center bg-background">
-      <div className="flex w-full max-w-md flex-col gap-2 overflow-hidden rounded-2xl">
-        <div className="flex flex-col items-center justify-center gap-1 px-4 text-center sm:px-16">
+      <div className="flex w-full max-w-sm flex-col gap-2 overflow-hidden rounded-2xl">
+        <div className="flex flex-col items-center justify-center gap-1 px-4 text-center">
           <h3 className="text-xl font-semibold dark:text-zinc-50">Connect your emails</h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
             Connect your emails to your Mail0 account
           </p>
         </div>
-        <div className="px-4 sm:px-16">
+        <div className="px-4 sm:px-0">
           {loading ? (
             <div className="flex justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-gray-500" />

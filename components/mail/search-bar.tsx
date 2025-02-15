@@ -85,11 +85,11 @@ export function SearchBar() {
     return () => subscription.unsubscribe();
   }, [form.watch]);
 
-  // TODO: please throttle this Nizzy, please
   const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
     // add logic for other fields
     setSearchValue({
       value: data.q,
+      highlight: data.q,
     });
   };
 
@@ -97,6 +97,7 @@ export function SearchBar() {
     form.reset();
     setSearchValue({
       value: "",
+      highlight: "",
     });
   };
 
