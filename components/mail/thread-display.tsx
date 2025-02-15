@@ -45,7 +45,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
 
   useEffect(() => {
     if (emailData) {
-      setIsMuted(emailData.unread ?? false);
+      setIsMuted(emailData[0].unread ?? false);
     }
   }, [emailData]);
 
@@ -104,15 +104,15 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
   if (!emailData) return <div>Loading...</div>;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-screen flex-col">
       <div
         className={cn(
-          "flex h-full flex-col transition-all duration-300",
-          isMobile ? "" : "rounded-r-lg pt-[6px]",
+          "relative flex h-full flex-col transition-all duration-300",
+          isMobile ? "" : "rounded-r-lg",
           isFullscreen ? "fixed inset-0 z-50 bg-background" : "",
         )}
       >
-        <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background/95 px-4 pb-[7.5px] pt-[0.5px] backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center border-b p-[7px]">
           <div className="flex flex-1 items-center gap-2">
             {!isMobile && (
               <Tooltip>
@@ -131,7 +131,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
               </Tooltip>
             )}
             <div className="max-w-[300px] flex-1 truncate text-sm font-medium">
-              {emailData.title || "No subject"}
+              {emailData[0].title || "No subject"}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -214,27 +214,25 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
           </div>
         </div>
 
-        <div className="space-y-6">
-          {emailData?.map((message, index) => (
+        <div className="h-full space-y-4 overflow-y-scroll">
+          {[...(emailData || [])].reverse().map((message, index) => (
             <div
-              key={message.id + index}
-              className={cn(
-                "transition-all duration-200",
-                index > 0 && "border-t border-border pt-6",
-              )}
+              key={message.id}
+              className={cn("transition-all duration-200", index > 0 && "border-t border-border")}
             >
               <MailDisplay
                 emailData={message}
                 isFullscreen={isFullscreen}
                 isMuted={isMuted}
                 isLoading={isLoading}
+                index={index}
               />
             </div>
           ))}
         </div>
 
         {!isFullscreen && (
-          <div className="relative bottom-0 left-0 right-0 z-10 bg-background px-4 pb-4 pt-2">
+          <div className="relative bottom-0 left-0 right-0 z-10 mb-4 bg-background px-4 pb-4 pt-2">
             <form className="relative space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -249,7 +247,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
                 className="min-h-[60px] w-full resize-none border-0 bg-[#18181A] leading-relaxed placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-base"
                 placeholder="Write your reply..."
                 spellCheck={true}
-                autoFocus
+                // autoFocus
               />
 
               {(attachments.length > 0 || isUploading) && (
@@ -318,7 +316,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>

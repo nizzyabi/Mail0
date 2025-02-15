@@ -123,7 +123,7 @@ export function Mail({ folder }: MailProps) {
           <ResizablePanel defaultSize={isMobile ? 100 : 35} minSize={isMobile ? 100 : 35}>
             <div className="flex-1 overflow-y-auto">
               <div>
-                <div className="sticky top-0 z-10 rounded-t-md bg-background pt-[6px]">
+                <div className="sticky top-0 z-10 rounded-tl-md bg-background pt-[6px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
                       <SidebarToggle className="h-fit px-2" />
@@ -192,7 +192,7 @@ export function Mail({ folder }: MailProps) {
             <>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
-                <div className="hidden h-full flex-1 overflow-y-auto md:block">
+                <div className="hidden h-[calc(100vh-(8px+8px))] flex-1 md:block">
                   <ThreadDisplay mail={mail.selected} onClose={handleClose} />
                 </div>
               </ResizablePanel>
