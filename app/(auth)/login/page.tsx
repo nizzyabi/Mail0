@@ -30,8 +30,8 @@ export default function Login() {
   if (isPending || (session && session.connectionId)) return null;
 
   return (
-    <div className="relative flex max-h-dvh min-h-screen w-screen items-center justify-center overflow-hidden border-2 bg-background">
-      <Card className="z-[20] flex h-fit w-[350px] translate-y-[-6rem] flex-col items-center justify-center rounded-2xl bg-background/20 py-2 backdrop-blur-xl">
+    <div className="flex max-h-dvh min-h-screen w-screen items-center justify-center overflow-hidden border-2 bg-grid-small-black/[0.39] dark:bg-grid-small-white/[0.025]">
+      <Card className="relative z-[20] flex h-fit w-[350px] flex-col items-center justify-center overflow-hidden rounded-2xl bg-background/20 py-2 backdrop-blur-xl">
         <CardHeader className="flex items-center justify-center">
           <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/20">
             <CircleUserRound />
@@ -76,22 +76,7 @@ export default function Login() {
             Log In with Github
           </Button>
         </CardContent>
-        <CardFooter className="text-xs font-semibold text-muted-foreground">
-          New User? Go to SignUp
-        </CardFooter>
       </Card>
-      <div className="absolute left-[50%] top-[-20rem] z-[10] size-[30rem] translate-x-[-50%] rotate-[54deg] rounded-xl border-2 border-red-500 bg-gradient-to-t from-primary to-muted-foreground/50 opacity-20 blur-[8em] transition-all duration-700 ease-out dark:opacity-70 dark:md:opacity-90"></div>
-      <Particles
-        className="absolute inset-y-0 z-[10] h-52 w-[30rem] scale-95 overflow-hidden md:scale-110"
-        quantity={50}
-        ease={80}
-        color={"#fff"}
-        refresh
-      />
-
-      <div className="absolute -bottom-[5rem] left-1/2 -translate-x-1/2 bg-gradient-to-b from-muted-foreground/60 via-muted-foreground/10 to-transparent bg-clip-text text-[10rem] font-extrabold text-transparent opacity-50 md:-bottom-[10rem] md:text-[20rem]">
-        Mail0
-      </div>
     </div>
   );
 }
