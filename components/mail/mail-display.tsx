@@ -256,10 +256,10 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
         <div
           className={cn(
             "relative flex-1 overflow-hidden bg-background",
-            isFullscreen && "h-[calc(100vh-4rem)]",
+            isFullscreen ? "h-[calc(100vh-4rem)]" : "h-[calc(100vh-8rem)]",
           )}
         >
-          <div className="relative inset-0 h-full overflow-y-auto pb-0">
+          <div className="h-full overflow-hidden">
             <div className="flex flex-col gap-4 px-4 py-4">
               <div className="flex items-start gap-3">
                 <Avatar>
@@ -283,8 +283,8 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
 
             <Separator />
 
-            <div className="h-[calc(100%-128px)] w-full p-0">
-              <div className="flex h-full w-full flex-1 flex-col p-0">
+            <div className="h-full w-full">
+              <div className="flex h-full w-full flex-col">
                 {emailData.blobUrl ? (
                   <iframe
                     key={emailData.id}
@@ -296,16 +296,13 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
                     title="Email Content"
                     sandbox="allow-same-origin"
                     style={{
-                      minHeight: "500px",
-                      height: "100%",
+                      height: "calc(100vh - 12rem)",
+                      width: "100%",
                       overflow: "auto",
                     }}
                   />
                 ) : (
-                  <div
-                    className="flex h-[500px] w-full items-center justify-center"
-                    style={{ minHeight: "500px" }}
-                  >
+                  <div className="flex h-[calc(100vh-12rem)] w-full items-center justify-center">
                     <div className="h-32 w-32 animate-pulse rounded-full bg-secondary" />
                   </div>
                 )}
@@ -313,7 +310,7 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             </div>
           </div>
         </div>
-        <div className="group absolute bottom-0 left-0 right-0 z-10">
+        <div className="group sticky bottom-0 left-0 right-0 z-50 bg-background">
           <div className="absolute bottom-0 left-0 right-0 flex h-8 cursor-pointer items-center justify-center bg-gradient-to-t from-background to-transparent">
             <div className="flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground">
               <Reply className="h-4 w-4" />
@@ -325,7 +322,7 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             className={cn(
               "relative mx-4 mb-4 space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm transition-all duration-200 ease-in-out",
               replyText === "" && (!attachmentField || attachmentField.length === 0)
-                ? "invisible translate-y-full opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+                ? "invisible translate-y-16 opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
                 : "visible translate-y-0 opacity-100",
             )}
             onSubmit={handleSubmit(onSubmit)}
