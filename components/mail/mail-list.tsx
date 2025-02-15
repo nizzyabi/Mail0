@@ -1,4 +1,5 @@
 import { ComponentProps, useMemo, useEffect, useRef, useState } from "react";
+import { EmptyState, type FolderType } from "@/components/mail/empty-state";
 import { preloadThread, useMarkAsRead } from "@/hooks/use-threads";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMail } from "@/components/mail/use-mail";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface MailListProps {
   items: InitialThread[];
+  folder: string;
 }
 
 const HOVER_DELAY = 300; // ms before prefetching
@@ -129,10 +131,16 @@ const Thread = ({ message: initialMessage }: { message: InitialThread }) => {
   );
 };
 
-export function MailList({ items }: MailListProps) {
+export function MailList({ items, folder }: MailListProps) {
   // TODO: add logic for tags filtering & search
+  const isEmpty = items.length === 0;
+
+  if (isEmpty) {
+    return <EmptyState folder={folder as FolderType} className="min-h-[90vh] md:min-h-[90vh]" />;
+  }
+
   return (
-    <ScrollArea className="" type="auto">
+    <ScrollArea className="h-full" type="auto">
       <div className="flex flex-col pt-0">
         {items.map((item) => (
           <Thread key={item.id} message={item} />
