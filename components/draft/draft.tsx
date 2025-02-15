@@ -157,7 +157,7 @@ export function Draft() {
                     <div className="flex items-center gap-1">
                       <SidebarToggle className="h-fit px-2" />
                     </div>
-                    <SearchBar filters={false} />
+                    <SearchBar />
                     <div className="flex items-center space-x-1.5">
                       <Button
                         variant="ghost"
