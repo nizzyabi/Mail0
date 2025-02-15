@@ -7,16 +7,19 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, SlidersHorizontal, CalendarIcon } from "lucide-react";
+import { useSearchValue } from "@/hooks/use-search-value";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
+import { useForm } from "react-hook-form";
+import { Form } from "../ui/form";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
-const inboxes = ["All Mail", "Inbox", "Drafts", "Sent", "Junk", "Trash", "Archive"];
+const inboxes = ["All Mail", "Inbox", "Drafts", "Sent", "Spam", "Trash", "Archive"];
 
 function DateFilter() {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -63,23 +66,54 @@ function DateFilter() {
   );
 }
 
-export function SearchBar({ filters = true }: { filters?: boolean }) {
-  const [subject, setSubject] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+export function SearchBar() {
+  const [, setSearchValue] = useSearchValue();
+  const form = useForm({
+    defaultValues: {
+      subject: "",
+      from: "",
+      to: "",
+      q: "",
+    },
+  });
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      submitSearch(data as { subject: string; from: string; to: string; q: string });
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
+    // add logic for other fields
+    setSearchValue({
+      value: data.q,
+      highlight: data.q,
+    });
+  };
+
+  const resetSearch = () => {
+    form.reset();
+    setSearchValue({
+      value: "",
+      highlight: "",
+    });
+  };
 
   return (
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
-      <div className="relative flex items-center">
-        <Search
-          className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
-          aria-hidden="true"
-        />
-        <Input
-          placeholder="Search"
-          className="h-7 w-full pl-8 pr-8 focus-visible:ring-0 focus-visible:ring-offset-0"
-        />
-        {filters && (
+      <form className="relative flex items-center">
+        <Form {...form}>
+          <Search
+            className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
+            aria-hidden="true"
+          />
+          <Input
+            placeholder="Search"
+            className="h-7 w-full pl-8 pr-14 focus-visible:ring-0 focus-visible:ring-offset-0"
+            {...form.register("q")}
+          />
           <div className="absolute right-2 flex items-center">
             <Popover>
               <PopoverTrigger asChild>
@@ -139,8 +173,7 @@ export function SearchBar({ filters = true }: { filters?: boolean }) {
                       <label className="text-xs font-medium text-muted-foreground">Subject</label>
                       <Input
                         placeholder="Email subject"
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        {...form.register("subject")}
                         className="h-8"
                       />
                     </div>
@@ -148,22 +181,12 @@ export function SearchBar({ filters = true }: { filters?: boolean }) {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <label className="text-xs font-medium text-muted-foreground">From</label>
-                        <Input
-                          placeholder="Sender"
-                          value={from}
-                          onChange={(e) => setFrom(e.target.value)}
-                          className="h-8"
-                        />
+                        <Input placeholder="Sender" {...form.register("from")} className="h-8" />
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-medium text-muted-foreground">To</label>
-                        <Input
-                          placeholder="Recipient"
-                          value={to}
-                          onChange={(e) => setTo(e.target.value)}
-                          className="h-8"
-                        />
+                        <Input placeholder="Recipient" {...form.register("to")} className="h-8" />
                       </div>
                     </div>
 
@@ -202,7 +225,7 @@ export function SearchBar({ filters = true }: { filters?: boolean }) {
 
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-2">
-                    <Button variant="ghost" size="sm" className="h-7 text-xs">
+                    <Button onClick={resetSearch} variant="ghost" size="sm" className="h-7 text-xs">
                       Reset
                     </Button>
                     <Button size="sm" className="h-7 text-xs">
@@ -213,8 +236,8 @@ export function SearchBar({ filters = true }: { filters?: boolean }) {
               </PopoverContent>
             </Popover>
           </div>
-        )}
-      </div>
+        </Form>
+      </form>
     </div>
   );
 }

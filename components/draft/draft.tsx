@@ -17,6 +17,8 @@ import * as React from "react";
 
 export function Draft() {
   const { drafts, addDraft, removeDraft } = useDrafts();
+
+  // Todo: store this in cookies / local storage
   const [isCompact, setIsCompact] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<DraftType | null>(null);
   const [isMobile, setIsMobile] = useState(false);
