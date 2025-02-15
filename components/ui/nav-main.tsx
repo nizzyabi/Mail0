@@ -41,7 +41,7 @@ export function NavMain({ items }: NavMainProps) {
     //remove trailing slashes
     const cleanPath = pathname?.replace(/\/$/, "") || "";
     const cleanUrl = url.replace(/\/$/, "");
-    return cleanPath === cleanUrl;
+    return cleanPath.startsWith(cleanUrl);
   };
 
   return (
