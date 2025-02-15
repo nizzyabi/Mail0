@@ -10,9 +10,7 @@ export function Providers({ children, ...props }: React.ComponentProps<typeof Ne
     <JotaiProvider>
       <NuqsAdapter>
         <NextThemesProvider {...props}>
-          {/* <PostHogProvider client={posthog}> */}
           <SidebarProvider>{children}</SidebarProvider>
-          {/* </PostHogProvider> */}
         </NextThemesProvider>
       </NuqsAdapter>
     </JotaiProvider>

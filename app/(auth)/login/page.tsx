@@ -1,11 +1,24 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { signIn, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { signIn } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function Login() {
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    if (!isPending && session?.connectionId) {
+      router.push("/mail");
+    }
+  }, [session, isPending, router]);
+
+  if (isPending || (session && session.connectionId)) return null;
+
   return (
     <div className="flex h-dvh w-screen items-center justify-center bg-background">
       <Card className="w-full max-w-md border-none shadow-none">
