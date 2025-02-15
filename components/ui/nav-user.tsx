@@ -40,7 +40,7 @@ export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
   const { setTheme, theme } = useTheme();
-  const { data: connections, isLoading } = useConnections();
+  const { data: connections, isLoading, mutate } = useConnections();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
@@ -56,6 +56,7 @@ export function NavUser() {
         },
       })
       .then(refetch)
+      .then(() => mutate())
       .catch((err) => {
         toast.error("Error switching connection", {
           description: err.response.data.message,
@@ -75,14 +76,13 @@ export function NavUser() {
       return axios
         .delete(`/api/v1/mail/connections/${session.connectionId}`)
         .then(() => handleAccountSwitch(remainingConnections[0])())
-        .then(() => window.location.reload())
         .catch((err) => {
           toast.error("Error logging out", {
-            description: err.response?.data?.message || "Unknown error",
+            description: err.response?.data?.message,
           });
         });
     } else {
-      // No remaining accounts, proceed with full better-auth sign out
+      // No remaining accounts, delete connection and proceed with full better-auth sign out
       return toast.promise(
         axios.delete(`/api/v1/mail/connections/${session.connectionId}`).then(() =>
           signOut({
