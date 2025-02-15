@@ -6,7 +6,7 @@ import { db } from "@/db";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { connectionId: string } },
+  { params }: { params: Promise<{ connectionId: string }> },
 ) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -16,9 +16,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    const { connectionId } = await params;
+
     await db
       .delete(connection)
-      .where(and(eq(connection.id, params.connectionId), eq(connection.userId, userId)));
+      .where(and(eq(connection.id, connectionId), eq(connection.userId, userId)));
 
     return NextResponse.json({ success: true });
   } catch (error) {
