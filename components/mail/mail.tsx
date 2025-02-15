@@ -185,7 +185,7 @@ export function Mail({ folder }: MailProps) {
                     </div>
                   ) : (
                     <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-                      <MailList items={threadsResponse?.messages || []} />
+                      <MailList items={threadsResponse?.messages || []} folder={folder} />
                     </div>
                   )}
                 </div>

@@ -103,6 +103,7 @@ export function SearchBar() {
     setSearchValue({
       value: searchQuery,
       filters: form.getValues(), // Keep existing filters
+      highlight: searchQuery,
     });
   }, 300);
 
@@ -124,6 +125,7 @@ export function SearchBar() {
         ...data,
         dateRange,
       },
+      highlight: data.q,
     });
     setIsPopoverOpen(false);
     // const formattedDateRange = dateRange
@@ -144,8 +146,12 @@ export function SearchBar() {
   const resetSearch = () => {
     form.reset();
     setDateRange(undefined);
-    setSearchValue({ value: "", filters: {} });
     setIsPopoverOpen(false);
+    setSearchValue({
+      value: "",
+      filters: {},
+      highlight: "",
+    });
   };
 
   return (

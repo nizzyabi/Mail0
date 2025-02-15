@@ -9,10 +9,12 @@ type Config = {
     to?: string;
     dateRange?: DateRange;
   };
+  highlight: string;
 };
 
 const configAtom = atom<Config>({
   value: "",
+  highlight: "",
 });
 
 export function useSearchValue() {
