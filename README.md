@@ -138,8 +138,12 @@ Before running the application, you'll need to set up several services and envir
    - Enable the Google OAuth2 API
    - Create OAuth 2.0 credentials (Web application type)
    - Add authorized redirect URIs:
-     - `http://localhost:3000/api/v1/mail/auth/google/callback"` (development)
-     - `https://your-production-url/api/v1/mail/auth/google/callback` (production)
+     - Development:
+       - `http://localhost:3000/api/auth/callback/google`
+       - `http://localhost:3000/api/v1/mail/auth/google/callback`
+     - Production:
+       - `https://your-production-url/api/auth/callback/google`
+       - `https://your-production-url/api/v1/mail/auth/google/callback`
    - Add to `.env`:
 
      ```env
