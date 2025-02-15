@@ -127,15 +127,23 @@ Before running the application, you'll need to set up several services and envir
      BETTER_AUTH_SECRET=your_secret_key
      ```
 
-3. **Google OAuth Setup (Optional)**
+3. **Google OAuth Setup**
 
    - Go to [Google Cloud Console](https://console.cloud.google.com)
    - Create a new project
+   - Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
+     - Use links above and click 'Enable' or
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
    - Enable the Google OAuth2 API
    - Create OAuth 2.0 credentials (Web application type)
    - Add authorized redirect URIs:
-     - `http://localhost:3000/api/v1/mail/auth/google/callback"` (development)
-     - `https://your-production-url/api/v1/mail/auth/google/callback` (production)
+     - Development:
+       - `http://localhost:3000/api/auth/callback/google`
+       - `http://localhost:3000/api/v1/mail/auth/google/callback`
+     - Production:
+       - `https://your-production-url/api/auth/callback/google`
+       - `https://your-production-url/api/v1/mail/auth/google/callback`
    - Add to `.env`:
 
      ```env
@@ -144,13 +152,14 @@ Before running the application, you'll need to set up several services and envir
      GOOGLE_REDIRECT_URI=http://localhost:3000/api/v1/mail/auth/google/callback
      ```
 
-> [!IMPORTANT]
-> The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
+   - Add yourself as a test user:
 
-- Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
-  - Use links above and click 'Enable' or
-  - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
-  - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
+     - Goto [`Audience`](https://console.cloud.google.com/auth/audience)
+     - Under 'Test users' click 'Add Users'
+     - Add your email and click 'Save'
+
+> [!WARNING]
+> The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
 
 ### Environment Variables
 

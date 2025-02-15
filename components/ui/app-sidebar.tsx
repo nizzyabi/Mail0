@@ -14,6 +14,7 @@ import {
   Tag,
   Code,
   ChartLine,
+  Settings,
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 import { $fetch } from "@/lib/auth-client";
@@ -106,6 +107,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "Advanced",
         items: [
+          {
+            title: "Settings",
+            url: "/settings",
+            icon: Settings,
+          },
           {
             title: "Analytics",
             url: "/mail/under-construction/analytics",

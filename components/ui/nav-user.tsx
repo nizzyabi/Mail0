@@ -3,10 +3,9 @@
 import {
   ChevronDown,
   ChevronRight,
-  Cog,
+  Laptop,
   LogIn,
   LogOut,
-  MonitorCog,
   Moon,
   Sun,
   UserCog,
@@ -25,9 +24,9 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
-import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { IConnection } from "@/types";
@@ -39,8 +38,8 @@ import axios from "axios";
 export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
-  const { setTheme, theme } = useTheme();
   const { data: connections, isLoading, mutate } = useConnections();
+  const { theme, setTheme } = useTheme();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
@@ -176,17 +175,13 @@ export function NavUser() {
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
+                  <DropdownMenuItem onClick={() => router.push("/settings/connections")}>
                     <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
                     Add another account
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
-              <Cog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              Settings
-            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
               <LogOut size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Log out
@@ -210,7 +205,7 @@ export function NavUser() {
                 <Sun strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
               </TabsTrigger>
               <TabsTrigger value="system" onClick={() => setTheme("system")} className="py-1">
-                <MonitorCog strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
+                <Laptop strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
               </TabsTrigger>
             </TabsList>
           </Tabs>
