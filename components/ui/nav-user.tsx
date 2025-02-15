@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  ChevronRight,
-  Cog,
-  LogIn,
-  LogOut,
-  MonitorCog,
-  Moon,
-  Sun,
-  UserCog,
-  UserPlus,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, LogIn, LogOut, UserCog, UserPlus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -25,11 +14,10 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { ModeToggle } from "@/components/theme/mode-toggle";
 import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
-import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { IConnection } from "@/types";
 import { useMemo } from "react";
 import Image from "next/image";
@@ -39,7 +27,6 @@ import axios from "axios";
 export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
-  const { setTheme, theme } = useTheme();
   const { data: connections, isLoading, mutate } = useConnections();
 
   const activeAccount = useMemo(() => {
@@ -176,17 +163,13 @@ export function NavUser() {
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
+                  <DropdownMenuItem onClick={() => router.push("/settings/connections")}>
                     <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
                     Add another account
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuItem onClick={() => router.push("/connect-emails")}>
-              <Cog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              Settings
-            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
               <LogOut size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
               Log out
@@ -201,19 +184,7 @@ export function NavUser() {
           </>
         )}
         <span className="mt-2 block w-full">
-          <Tabs defaultValue={theme} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="dark" onClick={() => setTheme("dark")}>
-                <Moon size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              </TabsTrigger>
-              <TabsTrigger value="light" onClick={() => setTheme("light")}>
-                <Sun size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              </TabsTrigger>
-              <TabsTrigger value="system" onClick={() => setTheme("system")}>
-                <MonitorCog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ModeToggle showLabels={false} />
         </span>
       </DropdownMenuContent>
     </DropdownMenu>

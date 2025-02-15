@@ -1,40 +1,53 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useEffect, useState } from "react";
+
+import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import * as React from "react";
+import { cn } from "@/lib/utils";
 
-export function ModeToggle() {
-  const { setTheme, theme } = useTheme();
+export function ModeToggle({
+  className,
+  showLabels = true,
+}: {
+  className?: string;
+  showLabels?: boolean;
+}) {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
-  const themes = [
-    { value: "light", icon: Sun, label: "Light" },
-    { value: "dark", icon: Moon, label: "Dark" },
-    { value: "system", icon: Monitor, label: "System" },
-  ];
+  // Fixes SSR hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className="h-9" />;
+  }
 
   return (
-    <fieldset className="flex size-6 rounded-full ring-1 ring-border">
-      <legend className="sr-only">Select a display theme:</legend>
-      {themes.map(({ value, icon: Icon, label }) => (
-        <span key={value} className="h-full">
-          <input
-            type="radio"
-            id={`theme-${value}`}
-            value={value}
-            checked={theme === value}
-            onChange={() => setTheme(value)}
-            className="peer sr-only"
-          />
-          <label
-            htmlFor={`theme-${value}`}
-            className="flex size-6 cursor-pointer items-center justify-center rounded-full transition-all duration-100 peer-checked:text-accent-foreground peer-checked:ring-1 peer-checked:ring-border peer-hover:text-accent-foreground peer-disabled:cursor-not-allowed"
-          >
-            <span className="sr-only">{label}</span>
-            <Icon className="size-4" />
-          </label>
-        </span>
-      ))}
-    </fieldset>
+    <ToggleGroup
+      type="single"
+      className={cn("h-9 justify-start", className)}
+      suppressHydrationWarning
+      value={theme}
+      onValueChange={setTheme}
+    >
+      <ToggleGroupItem suppressHydrationWarning value="light" className="flex items-center gap-2">
+        <Sun className="h-5 w-5" />
+        {showLabels ? "Light" : <span className="sr-only">Light</span>}
+      </ToggleGroupItem>
+
+      <ToggleGroupItem suppressHydrationWarning value="dark" className="flex items-center gap-2">
+        <Moon className="h-5 w-5" />
+        {showLabels ? "Dark" : <span className="sr-only">Dark</span>}
+      </ToggleGroupItem>
+
+      <ToggleGroupItem suppressHydrationWarning value="system" className="flex items-center gap-2">
+        <Laptop className="h-5 w-5" />
+        {showLabels ? "System" : <span className="sr-only">System</span>}
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 }

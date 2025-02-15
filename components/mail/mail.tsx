@@ -1,12 +1,18 @@
 "use client";
 
-import { AlignVerticalSpaceAround, Check, ListFilter, SquarePen } from "lucide-react";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import * as React from "react";
+import {
+  AlignVerticalSpaceAround,
+  ArchiveX,
+  BellOff,
+  Check,
+  ListFilter,
+  SquarePen,
+  X,
+} from "lucide-react";
+import { useState, useCallback, useMemo, useEffect, ReactNode, Suspense } from "react";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { MailDisplay } from "@/components/mail/mail-display";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { MailList } from "@/components/mail/mail-list";
 import { Separator } from "@/components/ui/separator";
 import { useMail } from "@/components/mail/use-mail";
@@ -30,11 +36,13 @@ import { useSearchParams } from "next/navigation";
 import { useThreads } from "@/hooks/use-threads";
 import { SearchBar } from "./search-bar";
 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 interface MailProps {
   accounts: {
     label: string;
     email: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
   }[];
   folder: string;
   defaultLayout: number[] | undefined;
@@ -46,7 +54,7 @@ interface MailProps {
 export function Mail({ folder }: MailProps) {
   const [searchValue] = useSearchValue();
   const [mail, setMail] = useMail();
-  const [isCompact, setIsCompact] = React.useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const searchParams = useSearchParams();
 
   const [isMobile, setIsMobile] = useState(false);
@@ -70,13 +78,14 @@ export function Mail({ folder }: MailProps) {
     return undefined;
   }, [filterValue, searchParams]);
   const { data: threadsResponse, isLoading } = useThreads(folder, labels, searchValue.value);
+
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [isTransitioning, setIsTransitioning] = useState(true);
 
   // Check if we're on mobile on mount and when window resizes
-  React.useEffect(() => {
+  useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768); // 768px is the 'md' breakpoint
     };
@@ -109,7 +118,7 @@ export function Mail({ folder }: MailProps) {
 
   const handleClose = useCallback(() => {
     setOpen(false);
-    setMail({ selected: null });
+    setMail((mail) => ({ ...mail, selected: null }));
   }, [setMail]);
 
   return (
@@ -118,44 +127,70 @@ export function Mail({ folder }: MailProps) {
         <ResizablePanelGroup
           direction="horizontal"
           autoSaveId={"mail-panel-layout"}
-          className="rounded-inherit overflow-hidden"
+          className="rounded-inherit overflow-hidden rounded-tl-md"
         >
           <ResizablePanel defaultSize={isMobile ? 100 : 35} minSize={isMobile ? 100 : 35}>
             <div className="flex-1 overflow-y-auto">
               <div>
-                <div className="sticky top-0 z-10 rounded-t-md bg-background pt-[6px]">
+                <div className="sticky top-0 z-10 bg-background pt-[6px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
                       <SidebarToggle className="h-fit px-2" />
-                      <React.Suspense>
+                      <Suspense>
                         <ComposeButton />
-                      </React.Suspense>
+                      </Suspense>
                     </div>
-                    <SearchBar />
-                    <div className="flex items-center space-x-1.5">
-                      <Button
-                        variant="ghost"
-                        className="md:h-fit md:px-2"
-                        onClick={() => setIsCompact(!isCompact)}
-                      >
-                        <AlignVerticalSpaceAround />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="md:h-fit md:px-2">
-                            <ListFilter className="h-4 w-4" />
+                    {mail.bulkSelected.length === 0 ? (
+                      <>
+                        <SearchBar />
+                        <div className="flex items-center space-x-1.5">
+                          <Button
+                            variant="ghost"
+                            className="md:h-fit md:px-2"
+                            onClick={() => setIsCompact(!isCompact)}
+                          >
+                            <AlignVerticalSpaceAround />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setFilterValue("all")}>
-                            All mail {filterValue === "all" && <Check />}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setFilterValue("unread")}>
-                            Unread {filterValue === "unread" && <Check />}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="md:h-fit md:px-2">
+                                <ListFilter className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setFilterValue("all")}>
+                                All mail {filterValue === "all" && <Check />}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setFilterValue("unread")}>
+                                Unread {filterValue === "unread" && <Check />}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center">
+                          <span className="text-sm tabular-nums text-muted-foreground">
+                            {mail.bulkSelected.length} selected
+                          </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="ml-1 h-8 w-fit px-2 text-muted-foreground"
+                                onClick={() => setMail({ ...mail, bulkSelected: [] })}
+                              >
+                                <X />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Clear Selection</TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <BulkSelectActions />
+                      </>
+                    )}
                   </div>
                   <Separator className="mt-2" />
                 </div>
@@ -181,7 +216,11 @@ export function Mail({ folder }: MailProps) {
                       ))}
                     </div>
                   ) : (
-                    <MailList items={threadsResponse?.messages || []} folder={folder} />
+                    <MailList
+                      items={threadsResponse?.messages || []}
+                      isCompact={isCompact}
+                      folder={folder}
+                    />
                   )}
                 </div>
               </div>
@@ -224,5 +263,28 @@ function ComposeButton() {
     <Button onClick={open} variant="ghost" className="h-fit px-2">
       <SquarePen />
     </Button>
+  );
+}
+
+function BulkSelectActions() {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" className="md:h-fit md:px-2">
+            <BellOff />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Mute</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" className="md:h-fit md:px-2">
+            <ArchiveX />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Move to Junk</TooltipContent>
+      </Tooltip>
+    </div>
   );
 }
