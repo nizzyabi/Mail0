@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Particles } from "@/components/magicui/particles";
 import { signIn, useSession } from "@/lib/auth-client";
 import { GitHub } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
