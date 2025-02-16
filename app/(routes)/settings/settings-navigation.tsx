@@ -1,7 +1,7 @@
 "use client";
 
 import { Settings, Mail, Shield, Palette, Keyboard, Bell } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -46,6 +46,12 @@ const tabs = [
 
 export function SettingsNavigation() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = searchParams.get("from");
+
+  const getHref = (tabHref: string) => {
+    return returnPath ? `${tabHref}?from=${returnPath}` : tabHref;
+  };
 
   return (
     <div className="flex flex-col md:w-80">
@@ -55,7 +61,7 @@ export function SettingsNavigation() {
           {tabs.map((tab) => (
             <Link
               key={tab.href}
-              href={tab.href}
+              href={getHref(tab.href)}
               className={cn(
                 "flex min-w-fit items-center gap-2 rounded-md px-4 py-2 text-sm font-medium",
                 pathname === tab.href
@@ -75,7 +81,7 @@ export function SettingsNavigation() {
         {tabs.map((tab) => (
           <Link
             key={tab.href}
-            href={tab.href}
+            href={getHref(tab.href)}
             className={cn(
               "group flex items-center gap-x-3 rounded-md p-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
               pathname === tab.href ? "bg-accent text-accent-foreground" : "text-muted-foreground",
