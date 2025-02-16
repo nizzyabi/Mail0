@@ -34,7 +34,7 @@ export function MailIframe({ html }: { html: string }) {
     <iframe
       height={height}
       ref={iframeRef}
-      className={cn("w-full flex-1 border-none transition-opacity duration-200")}
+      className={cn("w-full flex-1 rounded-md border-none transition-opacity duration-200")}
       title="Email Content"
       sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-scripts"
       style={{

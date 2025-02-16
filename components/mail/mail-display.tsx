@@ -35,7 +35,7 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Pro
   return (
     <div
       className={cn(
-        "relative m-4 flex-1 overflow-hidden rounded-lg border border-border bg-muted p-4",
+        "relative m-4 flex-1 overflow-hidden rounded-lg border border-border bg-secondary/50 p-4",
         isFullscreen && "h-[calc(100vh-4rem)]",
       )}
     >
@@ -142,7 +142,7 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Pro
           )}
         >
           <div className="min-h-0 overflow-hidden">
-            <div className="flex h-full w-full flex-1 flex-col p-0">
+            <div className="h-fit w-full p-0">
               {emailData.decodedBody ? (
                 // <p className="flex h-[500px] w-full items-center justify-center">
                 //   There should be an iframe in here
