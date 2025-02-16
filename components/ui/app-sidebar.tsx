@@ -1,28 +1,12 @@
 "use client";
 
-import {
-  Inbox,
-  FileText,
-  SendHorizontal,
-  Trash2,
-  Archive,
-  Users2,
-  Bell,
-  ArchiveX,
-  MessageSquare,
-  ShoppingCart,
-  Tag,
-  Settings,
-  ChevronDown,
-} from "lucide-react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 import { SettingsGearIcon } from "../icons/animated/settings-gear";
-import { PartyPopperIcon } from "../icons/animated/party-popper";
 import { CheckCheckIcon } from "../icons/animated/check-check";
 import { MessageCircleIcon } from "../icons/animated/message";
+import { SidebarThemeSwitch } from "./sidebar-theme-switch";
 import { BookTextIcon } from "../icons/animated/book-text";
 import { ArchiveIcon } from "../icons/animated/archive";
-import { DeleteIcon } from "../icons/animated/trash";
 import { UsersIcon } from "../icons/animated/users";
 import { InboxIcon } from "../icons/animated/inbox";
 import { CartIcon } from "../icons/animated/cart";
@@ -32,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { XIcon } from "../icons/animated/x";
 import { $fetch } from "@/lib/auth-client";
 import { BASE_URL } from "@/lib/constants";
+import { ChevronDown } from "lucide-react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import useSWR from "swr";
@@ -59,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Inbox",
-            url: "/mail",
+            url: "/mail/inbox",
             icon: InboxIcon,
             badge: stats?.[0] ?? 0,
           },
@@ -154,8 +139,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="mt-2 flex items-center justify-between gap-2">
         <NavUser />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="justify-between">
         <NavMain items={navItems} />
+        <div className="p-3">
+          <SidebarThemeSwitch />
+        </div>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

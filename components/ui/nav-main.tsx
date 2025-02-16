@@ -1,8 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { usePathname } from "next/navigation";
-import { LucideIcon } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import * as React from "react";
@@ -33,6 +31,7 @@ interface NavMainProps {
 
 export function NavMain({ items }: NavMainProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Create refs for each icon
   const iconRefs = useRef<{ [key: string]: React.RefObject<any> }>({});
@@ -48,10 +47,19 @@ export function NavMain({ items }: NavMainProps) {
     });
   }, [items]);
 
+  // Checks if the given URL matches the current URL path and required search parameters.
   const isUrlActive = (url: string) => {
-    const cleanPath = pathname?.replace(/\/$/, "") || "";
-    const cleanUrl = url.replace(/\/$/, "");
-    return cleanPath === cleanUrl;
+    const urlObj = new URL(url, window.location.origin);
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanUrl = urlObj.pathname.replace(/\/$/, "");
+
+    if (cleanPath !== cleanUrl) return false;
+
+    for (const [key, value] of new URLSearchParams(urlObj.search)) {
+      if (new URLSearchParams(searchParams).get(key) !== value) return false;
+    }
+
+    return true;
   };
 
   return (
@@ -72,7 +80,7 @@ export function NavMain({ items }: NavMainProps) {
                   className={cn(
                     "flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                     (item.isActive || isUrlActive(item.url)) &&
-                      "bg-accent/90 font-bold text-accent-foreground",
+                      "bg-accent/90 font-semibold text-accent-foreground",
                   )}
                   onMouseEnter={() => {
                     const iconRef = iconRefs.current[item.title]?.current;
@@ -111,7 +119,7 @@ export function NavMain({ items }: NavMainProps) {
                         key={k}
                         href={subItem.url}
                         className={cn(
-                          "mx-1 flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                          "mx-1 flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                           subItem.isActive && "bg-accent font-bold text-accent-foreground",
                         )}
                       >

@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  Book,
-  ChevronDown,
-  ChevronRight,
-  HelpCircle,
-  Laptop,
-  LogIn,
-  LogOut,
-  Moon,
-  Sun,
-  UserCog,
-  UserPlus,
-} from "lucide-react";
+import { Book, ChevronDown, HelpCircle, LogIn, LogOut, UserPlus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -20,17 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { IConnection } from "@/types";
 import { useMemo } from "react";
 import Image from "next/image";
@@ -41,7 +23,6 @@ export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
   const { data: connections, isLoading, mutate } = useConnections();
-  const { theme, setTheme } = useTheme();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;

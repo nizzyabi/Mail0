@@ -9,12 +9,12 @@ interface MailPageProps {
   }>;
 }
 
-const AllowedFolders = ["inbox", "draft", "sent", "spam", "trash", "archive"];
+const ALLOWED_FOLDERS = ["inbox", "draft", "sent", "spam", "trash", "archive"];
 
 export default async function MailPage({ params }: MailPageProps) {
-  const resolvedParams = await params;
+  const { folder } = await params;
 
-  if (!AllowedFolders.includes(resolvedParams.folder)) {
+  if (!ALLOWED_FOLDERS.includes(folder)) {
     return <div>Invalid folder</div>;
   }
 
@@ -26,16 +26,12 @@ export default async function MailPage({ params }: MailPageProps) {
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
 
   return (
-    <div className="w-full bg-white dark:bg-sidebar">
-      <div className="flex-col overflow-hidden dark:bg-[#090909] dark:text-gray-100 md:m-2 md:ml-0 md:flex md:rounded-md md:border">
-        <Mail
-          accounts={accounts}
-          folder={resolvedParams.folder}
-          defaultLayout={defaultLayout}
-          defaultCollapsed={defaultCollapsed}
-          navCollapsedSize={4}
-        />
-      </div>
-    </div>
+    <Mail
+      accounts={accounts}
+      folder={folder}
+      defaultLayout={defaultLayout}
+      defaultCollapsed={defaultCollapsed}
+      navCollapsedSize={4}
+    />
   );
 }

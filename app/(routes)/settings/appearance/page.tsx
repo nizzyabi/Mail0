@@ -59,7 +59,7 @@ export default function AppearancePage() {
                 control={form.control}
                 name="inboxType"
                 render={({ field }) => (
-                  <FormItem className="space-y-4">
+                  <FormItem className="space-y-2">
                     <FormLabel>Inbox Layout</FormLabel>
                     <FormControl>
                       <RadioGroup

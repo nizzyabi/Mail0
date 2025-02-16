@@ -18,11 +18,6 @@ type Props = {
   index: number;
 };
 
-type FormInputs = {
-  replyText: string;
-  attachments: File[];
-};
-
 const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
 

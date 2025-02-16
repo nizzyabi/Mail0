@@ -95,7 +95,7 @@ export function SettingsNavigation() {
                   "line-clamp-1 text-xs font-normal transition-colors",
                   pathname === tab.href
                     ? "text-accent-foreground/80"
-                    : "text-muted-foreground/60 group-hover:text-accent-foreground/80",
+                    : "text-muted-foreground/70 group-hover:text-accent-foreground/80",
                 )}
               >
                 {tab.description}

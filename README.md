@@ -181,6 +181,24 @@ Before running the application, you'll need to set up several services and envir
 > [!WARNING]
 > The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
 
+4. **Github OAuth Setup**
+
+   - Go to [Github Developer Setting](https://github.com/settings/developers)
+   - Create a new OAuth Apps
+   - Add authorized redirect URIs:
+
+     - Development:
+       - `http://localhost:3000/api/auth/callback/github`
+     - Production:
+       - `https://your-production-url/api/auth/callback/github`
+
+   - Add to `.env`:
+
+     ```env
+     GITHUB_CLIENT_ID=your_client_id
+     GITHUB_CLIENT_SECRET=your_client_secret
+     ```
+
 ### Environment Variables
 
 Copy `.env.example` to `.env` and configure the following variables:

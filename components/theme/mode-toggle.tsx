@@ -7,20 +7,39 @@ import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
-export function ModeToggle({
-  className,
-  showLabels = true,
-}: {
+interface ModeToggleProps {
   className?: string;
-  showLabels?: boolean;
-}) {
+}
+
+export function ModeToggle({ className }: ModeToggleProps) {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
 
   // Fixes SSR hydration
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const { theme, systemTheme, resolvedTheme, setTheme } = useTheme();
+
+  async function handleThemeChange(newTheme: string) {
+    let nextResolvedTheme = newTheme;
+
+    if (newTheme === "system" && systemTheme) {
+      nextResolvedTheme = systemTheme;
+    }
+
+    function update() {
+      setTheme(newTheme);
+    }
+
+    if (document.startViewTransition && nextResolvedTheme !== resolvedTheme) {
+      document.documentElement.style.viewTransitionName = "theme-transition";
+      await document.startViewTransition(update).finished;
+      document.documentElement.style.viewTransitionName = "";
+    } else {
+      update();
+    }
+  }
 
   if (!mounted) {
     return <div className="h-9" />;
@@ -29,24 +48,36 @@ export function ModeToggle({
   return (
     <ToggleGroup
       type="single"
-      className={cn("h-9 justify-start", className)}
+      className={cn("h-9 max-w-xs justify-start", className)}
       suppressHydrationWarning
       value={theme}
-      onValueChange={setTheme}
+      onValueChange={handleThemeChange}
     >
-      <ToggleGroupItem suppressHydrationWarning value="light" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="light"
+        className="flex flex-1 items-center gap-2"
+      >
         <Sun className="h-5 w-5" />
-        {showLabels ? "Light" : <span className="sr-only">Light</span>}
+        <span className="sr-only">Light</span>
       </ToggleGroupItem>
 
-      <ToggleGroupItem suppressHydrationWarning value="dark" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="dark"
+        className="flex flex-1 items-center gap-2"
+      >
         <Moon className="h-5 w-5" />
-        {showLabels ? "Dark" : <span className="sr-only">Dark</span>}
+        <span className="sr-only">Dark</span>
       </ToggleGroupItem>
 
-      <ToggleGroupItem suppressHydrationWarning value="system" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="system"
+        className="flex flex-1 items-center gap-2"
+      >
         <Laptop className="h-5 w-5" />
-        {showLabels ? "System" : <span className="sr-only">System</span>}
+        <span className="sr-only">System</span>
       </ToggleGroupItem>
     </ToggleGroup>
   );

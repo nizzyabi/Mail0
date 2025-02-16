@@ -105,13 +105,10 @@ export function SearchBar() {
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
       <form className="relative flex items-center">
         <Form {...form}>
-          <Search
-            className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
-            aria-hidden="true"
-          />
+          <Search className="absolute left-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Search"
-            className="h-7 w-full pl-8 pr-14 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-8 w-full rounded-lg border-none pl-8 pr-14 text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
             {...form.register("q")}
           />
           <div className="absolute right-2 flex items-center">
@@ -119,7 +116,7 @@ export function SearchBar() {
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-5 w-5 p-0 hover:bg-transparent">
                   <SlidersHorizontal
-                    className="h-3.5 w-3.5 text-muted-foreground/70"
+                    className="h-3.5 w-3.5 text-muted-foreground"
                     aria-hidden="true"
                   />
                 </Button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { AlignVerticalSpaceAround, Search, Trash2 } from "lucide-react";
+import { AlignVerticalSpaceAround, Trash2 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";

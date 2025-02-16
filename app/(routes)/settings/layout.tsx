@@ -6,9 +6,18 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { Suspense } from "react";
 import Link from "next/link";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<SettingsLayoutSkeleton />}>
+      <SettingsLayoutContent children={children} />
+    </Suspense>
+  );
+}
+
+function SettingsLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnPath = searchParams.get("from") || "/mail";
@@ -67,6 +76,20 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+// Basic skeleton component while the layout loads
+function SettingsLayoutSkeleton() {
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-background">
+      <div className="mx-auto w-full max-w-[1600px] flex-1 p-4 pb-0 md:p-6 md:pb-0 lg:p-8 lg:pb-0">
+        <div className="animate-pulse">
+          {/* Add skeleton UI here */}
+          <div className="h-8 w-24 rounded bg-muted" />
+        </div>
+      </div>
     </div>
   );
 }
