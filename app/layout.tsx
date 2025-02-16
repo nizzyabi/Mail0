@@ -1,5 +1,6 @@
 import MailComposeModal from "@/components/mail/mail-compose-modal";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { siteConfig } from "@/lib/site-config";
 import { Toast } from "@/components/ui/toast";
 import { Providers } from "@/lib/providers";
@@ -33,6 +34,7 @@ export default function RootLayout({
           </Suspense>
           {children}
           <Toast />
+          <Analytics />
         </Providers>
       </body>
     </html>

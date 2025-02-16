@@ -109,14 +109,34 @@ Mail0.io is built with modern and reliable technologies:
 
 Before running the application, you'll need to set up several services and environment variables:
 
-1. **Setup Local Services with Docker**
+1. **Setup Local Services with Dev Container and Docker**
 
    - Make sure you have [Docker](https://docs.docker.com/get-docker/), [NodeJS](https://nodejs.org/en/download/), and [pnpm](https://pnpm.io/installation) installed.
-   - Clone the repository: `git clone https://github.com/nizzyabi/Mail0.git`
-   - Install all dependencies: `pnpm install`
-   - Copy the example env, `cp .env.example .env`
-   - Run `pnpm docker:up` to start the database and other services.
-   - Run `pnpm db:push` to sync your schema with the database
+   - Open codebase as a container in [VSCode](https://code.visualstudio.com/) or your favorite VSCode fork.
+   - Run the following commands in order
+
+     ```
+     pnpm install
+     pnpm docker:up
+     pnpm db:push
+     pnpm dev
+     ```
+
+   - Run the following commands to clean up after yourself
+
+     ```
+     pnpm docker:down
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
+   - Run the following commands if you are unable to start any of the services
+
+     ```
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
    - Use `pnpm db:studio` to view and manage your data
 
 2. **Better Auth Setup**
@@ -127,15 +147,23 @@ Before running the application, you'll need to set up several services and envir
      BETTER_AUTH_SECRET=your_secret_key
      ```
 
-3. **Google OAuth Setup (Optional)**
+3. **Google OAuth Setup**
 
    - Go to [Google Cloud Console](https://console.cloud.google.com)
    - Create a new project
+   - Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
+     - Use links above and click 'Enable' or
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
    - Enable the Google OAuth2 API
    - Create OAuth 2.0 credentials (Web application type)
    - Add authorized redirect URIs:
-     - `http://localhost:3000/api/v1/mail/auth/google/callback"` (development)
-     - `https://your-production-url/api/v1/mail/auth/google/callback` (production)
+     - Development:
+       - `http://localhost:3000/api/auth/callback/google`
+       - `http://localhost:3000/api/v1/mail/auth/google/callback`
+     - Production:
+       - `https://your-production-url/api/auth/callback/google`
+       - `https://your-production-url/api/v1/mail/auth/google/callback`
    - Add to `.env`:
 
      ```env
@@ -144,13 +172,14 @@ Before running the application, you'll need to set up several services and envir
      GOOGLE_REDIRECT_URI=http://localhost:3000/api/v1/mail/auth/google/callback
      ```
 
-> [!IMPORTANT]
-> The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
+   - Add yourself as a test user:
 
-- Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
-  - Use links above and click 'Enable' or
-  - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
-  - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
+     - Goto [`Audience`](https://console.cloud.google.com/auth/audience)
+     - Under 'Test users' click 'Add Users'
+     - Add your email and click 'Save'
+
+> [!WARNING]
+> The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
 
 ### Environment Variables
 

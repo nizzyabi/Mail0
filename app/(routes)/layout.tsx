@@ -1,4 +1,3 @@
-import { AppSidebar } from "@/components/ui/app-sidebar";
 import { SWRConfig } from "swr";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -7,7 +6,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SWRConfig
         value={{ keepPreviousData: true, revalidateOnFocus: false, revalidateIfStale: false }}
       >
-        <AppSidebar />
         {children}
       </SWRConfig>
     </div>

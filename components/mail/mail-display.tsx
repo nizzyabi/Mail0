@@ -1,5 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { BellOff, Lock } from "lucide-react";
 import { Separator } from "../ui/separator";
@@ -17,8 +18,32 @@ type Props = {
   index: number;
 };
 
+type FormInputs = {
+  replyText: string;
+  attachments: File[];
+};
+
 const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    // formState: { errors },
+  } = useForm<FormInputs>({
+    defaultValues: {
+      replyText: "",
+      attachments: undefined,
+    },
+  });
+
+  // Watch form values for visibility control
+  const replyText = watch("replyText");
+  const attachmentField = watch("attachments");
+
+  const onSubmit: SubmitHandler<FormInputs> = (data) => console.log(data);
 
   useEffect(() => {
     // First message in the thread should be expanded by default
@@ -120,7 +145,6 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Pro
             </div>
           </div>
         </div>
-
         <div
           className={cn(
             "h-0 overflow-hidden transition-all duration-200",

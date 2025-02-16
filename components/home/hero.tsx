@@ -101,7 +101,6 @@ export default function Hero() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
