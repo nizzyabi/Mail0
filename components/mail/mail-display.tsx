@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { BellOff, Lock } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { useState, useEffect } from "react";
+import { MailIframe } from "./mail-iframe";
 import { ParsedMessage } from "@/types";
 import { Button } from "../ui/button";
 import { format } from "date-fns";
@@ -163,9 +164,10 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Pro
           <div className="min-h-0 overflow-hidden">
             <div className="flex h-full w-full flex-1 flex-col p-0">
               {emailData.blobUrl ? (
-                <p className="flex h-[500px] w-full items-center justify-center">
-                  There should be an iframe in here
-                </p>
+                // <p className="flex h-[500px] w-full items-center justify-center">
+                //   There should be an iframe in here
+                // </p>
+                <MailIframe html={emailData.blobUrl} />
               ) : (
                 <div
                   className="flex h-[500px] w-full items-center justify-center"
