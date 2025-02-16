@@ -1,14 +1,6 @@
 "use client";
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Form,
   FormControl,
   FormDescription,
@@ -23,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SettingsCard } from "@/components/settings/settings-card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Globe, Clock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,17 +61,42 @@ export default function GeneralPage() {
     }, 1000);
   }
 
+  const handleSignOut = async () => {
+    await toast.promise(
+      signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/");
+          },
+        },
+      }),
+      {
+        loading: "Signing out...",
+        success: () => "Signed out successfully!",
+        error: "Error signing out",
+      },
+    );
+  };
+
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle className="">General </CardTitle>
-        <CardDescription>
-          Manage settings for your language and email display preferences.
-        </CardDescription>
-      </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-5">
+    <div className="grid gap-6">
+      <SettingsCard
+        title="General Settings"
+        description="Manage settings for your language and email display preferences."
+        footer={
+          <div className="flex justify-between">
+            <Button variant="destructive" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </Button>
+            <Button type="submit" form="general-form" disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save changes"}
+            </Button>
+          </div>
+        }
+      >
+        <Form {...form}>
+          <form id="general-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
               name="language"
@@ -162,38 +180,9 @@ export default function GeneralPage() {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={async () => {
-                toast.promise(
-                  signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        router.push("/");
-                      },
-                    },
-                  }),
-                  {
-                    loading: "Signing out...",
-                    success: () => "Signed out successfully!",
-                    error: "Error signing out",
-                  },
-                );
-              }}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
-              {isSaving ? "Saving..." : "Save changes"}
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+          </form>
+        </Form>
+      </SettingsCard>
+    </div>
   );
 }

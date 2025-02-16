@@ -14,7 +14,7 @@ export default function Navbar() {
       <div className="hidden gap-10 text-sm text-muted-foreground md:flex">
         <Link href="https://github.com/nizzyabi/Mail0">Github</Link>
         <Link href=" https://discord.gg/5nwrvt3JH2">Discord</Link>
-        <Link href="/privacy">Terms & Privacy</Link>
+        <Link href="/privacy">Privacy</Link>
       </div>
 
       {/* Mobile Navigation */}

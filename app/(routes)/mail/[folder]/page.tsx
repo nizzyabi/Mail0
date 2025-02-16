@@ -27,7 +27,7 @@ export default async function MailPage({ params }: MailPageProps) {
 
   return (
     <div className="w-full bg-white dark:bg-sidebar">
-      <div className="flex-col bg-[#090909] dark:text-gray-100 md:m-2 md:flex md:rounded-md md:border">
+      <div className="flex-col overflow-hidden dark:bg-[#090909] dark:text-gray-100 md:m-2 md:ml-0 md:flex md:rounded-md md:border">
         <Mail
           accounts={accounts}
           folder={resolvedParams.folder}

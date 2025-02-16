@@ -12,14 +12,26 @@ import {
   MessageSquare,
   ShoppingCart,
   Tag,
-  Code,
-  ChartLine,
   Settings,
+  ChevronDown,
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import { SettingsGearIcon } from "../icons/animated/settings-gear";
+import { PartyPopperIcon } from "../icons/animated/party-popper";
+import { CheckCheckIcon } from "../icons/animated/check-check";
+import { MessageCircleIcon } from "../icons/animated/message";
+import { BookTextIcon } from "../icons/animated/book-text";
+import { ArchiveIcon } from "../icons/animated/archive";
+import { DeleteIcon } from "../icons/animated/trash";
+import { UsersIcon } from "../icons/animated/users";
+import { InboxIcon } from "../icons/animated/inbox";
+import { CartIcon } from "../icons/animated/cart";
+import { BellIcon } from "../icons/animated/bell";
+import React, { useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import { XIcon } from "../icons/animated/x";
 import { $fetch } from "@/lib/auth-client";
 import { BASE_URL } from "@/lib/constants";
-import React, { useMemo } from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import useSWR from "swr";
@@ -28,8 +40,18 @@ const fetchStats = async () => {
   return await $fetch("/api/v1/mail/count?", { baseURL: BASE_URL }).then((e) => e.data as number[]);
 };
 
+const settingsPages = [
+  { title: "General", url: "/settings/general" },
+  { title: "Connections", url: "/settings/connections" },
+  { title: "Appearance", url: "/settings/appearance" },
+  { title: "Shortcuts", url: "/settings/shortcuts" },
+];
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: stats } = useSWR<number[]>("/api/v1/mail/count", fetchStats);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const pathname = usePathname();
+
   const navItems = useMemo(
     () => [
       {
@@ -38,34 +60,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Inbox",
             url: "/mail",
-            icon: Inbox,
+            icon: InboxIcon,
             badge: stats?.[0] ?? 0,
           },
           {
             title: "Drafts",
             url: "/mail/draft",
-            icon: FileText,
+            icon: BookTextIcon,
           },
           {
             title: "Sent",
             url: "/mail/sent",
-            icon: SendHorizontal,
+            icon: CheckCheckIcon,
           },
           {
             title: "Spam",
             url: "/mail/spam",
-            icon: ArchiveX,
+            icon: XIcon,
             badge: stats?.[1] ?? 0,
-          },
-          {
-            title: "Trash",
-            url: "/mail/trash",
-            icon: Trash2,
           },
           {
             title: "Archive",
             url: "/mail/archive",
-            icon: Archive,
+            icon: ArchiveIcon,
           },
         ],
       },
@@ -75,32 +92,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Social",
             url: "/mail/inbox?category=social",
-            icon: Users2,
+            icon: UsersIcon,
             badge: 972,
           },
           {
             title: "Updates",
             url: "/mail/inbox?category=updates",
-            icon: Bell,
+            icon: BellIcon,
             badge: 342,
           },
           {
             title: "Forums",
             url: "/mail/inbox?category=forums",
-            icon: MessageSquare,
+            icon: MessageCircleIcon,
             badge: 128,
           },
           {
             title: "Shopping",
             url: "/mail/inbox?category=shopping",
-            icon: ShoppingCart,
+            icon: CartIcon,
             badge: 8,
-          },
-          {
-            title: "Promotions",
-            url: "/mail/inbox?category=promotions",
-            icon: Tag,
-            badge: 21,
           },
         ],
       },
@@ -110,34 +121,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Settings",
             url: "/settings",
-            icon: Settings,
+            icon: SettingsGearIcon,
+            isExpanded: isSettingsOpen,
+            onClick: (e: React.MouseEvent) => {
+              e.preventDefault();
+              setIsSettingsOpen(!isSettingsOpen);
+            },
+            suffix: ChevronDown,
+            subItems: settingsPages.map((page) => ({
+              title: page.title,
+              url: page.url,
+              isActive: pathname === page.url,
+            })),
           },
-          {
-            title: "Analytics",
-            url: "/mail/under-construction/analytics",
-            icon: ChartLine,
-          },
-          {
-            title: "Developers",
-            url: "/mail/under-construction/developers",
-            icon: Code,
-          },
+          // {
+          //   title: "Analytics",
+          //   url: "/mail/under-construction/analytics",
+          //   icon: ChartLine,
+          // },
+          // {
+          //   title: "Developers",
+          //   url: "/mail/under-construction/developers",
+          //   icon: Code,
+          // },
         ],
       },
     ],
-    [stats],
+    [stats, isSettingsOpen, pathname],
   );
+
   return (
-    <>
-      <Sidebar collapsible="icon" {...props}>
-        <SidebarHeader className="mt-2 flex items-center justify-between gap-2">
-          <NavUser />
-        </SidebarHeader>
-        <SidebarContent>
-          <NavMain items={navItems} />
-        </SidebarContent>
-        <SidebarRail />
-      </Sidebar>
-    </>
+    <Sidebar {...props}>
+      <SidebarHeader className="mt-2 flex items-center justify-between gap-2">
+        <NavUser />
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={navItems} />
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   );
 }

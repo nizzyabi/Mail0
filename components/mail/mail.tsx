@@ -135,7 +135,7 @@ export function Mail({ folder }: MailProps) {
                 <div className="sticky top-0 z-10 bg-background pt-[6px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
-                      <SidebarToggle className="h-fit px-2" />
+                      <SidebarToggle className="h-fit px-2 md:hidden" />
                       <Suspense>
                         <ComposeButton />
                       </Suspense>
@@ -195,7 +195,7 @@ export function Mail({ folder }: MailProps) {
                   <Separator className="mt-2" />
                 </div>
 
-                <div className="h-[calc(93vh)]">
+                <div className="h-[calc(100svh-(8px+8px+6px+47px-2px))] overflow-scroll rounded-b-sm bg-background">
                   {isLoading || isTransitioning ? (
                     <div className="flex flex-col">
                       {[...Array(8)].map((_, i) => (

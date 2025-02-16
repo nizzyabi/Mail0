@@ -109,14 +109,34 @@ Mail0.io is built with modern and reliable technologies:
 
 Before running the application, you'll need to set up several services and environment variables:
 
-1. **Setup Local Services with Docker**
+1. **Setup Local Services with Dev Container and Docker**
 
    - Make sure you have [Docker](https://docs.docker.com/get-docker/), [NodeJS](https://nodejs.org/en/download/), and [pnpm](https://pnpm.io/installation) installed.
-   - Clone the repository: `git clone https://github.com/nizzyabi/Mail0.git`
-   - Install all dependencies: `pnpm install`
-   - Copy the example env, `cp .env.example .env`
-   - Run `pnpm docker:up` to start the database and other services.
-   - Run `pnpm db:push` to sync your schema with the database
+   - Open codebase as a container in [VSCode](https://code.visualstudio.com/) or your favorite VSCode fork.
+   - Run the following commands in order
+
+     ```
+     pnpm install
+     pnpm docker:up
+     pnpm db:push
+     pnpm dev
+     ```
+
+   - Run the following commands to clean up after yourself
+
+     ```
+     pnpm docker:down
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
+   - Run the following commands if you are unable to start any of the services
+
+     ```
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
    - Use `pnpm db:studio` to view and manage your data
 
 2. **Better Auth Setup**
