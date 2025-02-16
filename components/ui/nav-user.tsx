@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, LogIn, LogOut, UserCog, UserPlus } from "lucide-react";
+import { Book, ChevronDown, HelpCircle, LogIn, LogOut, UserPlus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -8,13 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { ModeToggle } from "@/components/theme/mode-toggle";
 import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -122,70 +117,81 @@ export function NavUser() {
         </SidebarMenuItem>
       </SidebarMenu>
       <DropdownMenuContent
-        className="ml-2 w-[--radix-dropdown-menu-trigger-width] min-w-52 font-medium"
+        className="ml-3 w-[--radix-dropdown-menu-trigger-width] min-w-56 font-medium"
         align="end"
         side={"bottom"}
         sideOffset={1}
       >
-        {session ? (
-          <>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="flex items-center justify-between gap-2">
+        <DropdownMenuItem onClick={() => router.push("/support")}>
+          <div className="flex cursor-pointer items-center gap-2 text-[13px]">
+            <HelpCircle size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
+            <p className="text-[13px] opacity-60">Customer Support</p>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => window.open("https://github.com/nizzyabi/mail0", "_blank")}
+        >
+          <div className="flex cursor-pointer items-center gap-2 text-[13px]">
+            <Book size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
+            <p className="text-[13px] opacity-60">Documentation</p>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <div className="space-y-1">
+          {session ? (
+            <>
+              <div className="px-1 py-1.5 text-[11px] text-muted-foreground">Accounts</div>
+              {connections?.map((connection) => (
+                <DropdownMenuItem
+                  key={connection.id}
+                  onClick={handleAccountSwitch(connection)}
+                  className={`flex cursor-pointer items-center gap-3 py-0.5 ${
+                    connection.id === session?.connectionId ? "bg-accent" : ""
+                  }`}
+                >
+                  <Image
+                    src={connection.picture || "/placeholder.svg"}
+                    alt={connection.name || connection.email}
+                    className="size-5 shrink-0 rounded"
+                    width={16}
+                    height={16}
+                  />
+                  <div className="-space-y-1">
+                    <p className="text-[12px]">{connection.name || connection.email}</p>
+                    {connection.name && (
+                      <p className="text-[12px] text-muted-foreground">
+                        {connection.email.length > 25
+                          ? `${connection.email.slice(0, 25)}...`
+                          : connection.email}
+                      </p>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuItem
+                className="mt-1 cursor-pointer"
+                onClick={() => router.push("/settings/connections")}
+              >
                 <div className="flex items-center gap-2">
-                  <UserCog size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-                  Switch account
+                  <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
+                  <p className="text-[13px] opacity-60">Add email</p>
                 </div>
-                <ChevronRight size={8} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="ml-1">
-                  {connections?.map((connection) => (
-                    <DropdownMenuItem
-                      key={connection.id}
-                      onClick={handleAccountSwitch(connection)}
-                      className="flex items-center gap-2"
-                    >
-                      <Image
-                        src={connection.picture || "/placeholder.svg"}
-                        alt={connection.name || connection.email}
-                        className="size-4 shrink-0 rounded"
-                        width={16}
-                        height={16}
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-[12px]">{connection.name || connection.email}</span>
-                        {connection.name && (
-                          <span className="text-[12px] text-muted-foreground">
-                            {connection.email}
-                          </span>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/settings/connections")}>
-                    <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-                    Add another account
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
-              <LogOut size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              Log out
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/login")}>
-              <LogIn size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
-              Sign in
-            </DropdownMenuItem>
-          </>
-        )}
-        <span className="mt-2 block w-full">
-          <ModeToggle showLabels={false} className="h-fit" />
-        </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                <LogOut size={16} strokeWidth={2} className="mr-1 opacity-60" aria-hidden="true" />
+                <p className="text-[13px] opacity-60">Log out</p>
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/login")}>
+                <LogIn size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />
+                <p className="text-[13px] opacity-60">Sign in</p>
+              </DropdownMenuItem>
+            </>
+          )}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
