@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { accounts, mails } from "@/components/mail/data";
+import { accounts } from "@/components/mail/data";
 import { Mail } from "@/components/mail/mail";
 
 export default async function MailPage() {
@@ -12,11 +12,11 @@ export default async function MailPage() {
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
 
   return (
-    <div className="w-full bg-white dark:bg-sidebar">
-      <div className="flex-col dark:bg-[#090909] dark:text-gray-100 md:m-2 md:flex md:rounded-md md:border">
+    <div className="w-full bg-sidebar">
+      <div className="flex-col dark:bg-[#090909] dark:text-gray-100 md:m-2 md:ml-0 md:flex md:rounded-md md:border">
         <Mail
           accounts={accounts}
-          mails={mails}
+          folder={"inbox"}
           defaultLayout={defaultLayout}
           defaultCollapsed={defaultCollapsed}
           navCollapsedSize={4}
