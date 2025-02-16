@@ -68,6 +68,7 @@ export const EMAIL_HTML_TEMPLATE = `
           padding: 16px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
           line-height: 1.5;
+          height: fit-content;
         }
         .auto-details summary::marker {
            content: "...";

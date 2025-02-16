@@ -1,5 +1,6 @@
 import { fixNonReadableColors, template } from "@/lib/email-utils";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +8,7 @@ export function MailIframe({ html }: { html: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(300);
   const { resolvedTheme } = useTheme();
+  const [loaded, setLoaded] = useState(false);
 
   const iframeDoc = useMemo(() => template(html), [html]);
 
@@ -14,13 +16,20 @@ export function MailIframe({ html }: { html: string }) {
     if (!iframeRef.current) return;
     const url = URL.createObjectURL(new Blob([iframeDoc], { type: "text/html" }));
     iframeRef.current.src = url;
-    iframeRef.current.onload = () => {
-      setHeight(iframeRef.current?.contentWindow?.document.body.scrollHeight || 300);
-      if (iframeRef.current?.contentWindow?.document.body)
+    const handler = () => {
+      if (iframeRef.current?.contentWindow?.document.body) {
+        const height = iframeRef.current.contentWindow.document.body.getBoundingClientRect().height;
+        setHeight(height);
         fixNonReadableColors(iframeRef.current.contentWindow.document.body);
+      }
+      setLoaded(true);
     };
-    return () => URL.revokeObjectURL(url);
-  }, [html]);
+    iframeRef.current.onload = handler;
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [iframeDoc]);
 
   useEffect(() => {
     if (iframeRef.current?.contentWindow?.document.body) {
@@ -31,16 +40,27 @@ export function MailIframe({ html }: { html: string }) {
   }, [resolvedTheme]);
 
   return (
-    <iframe
-      height={height}
-      ref={iframeRef}
-      className={cn("w-full flex-1 rounded-md border-none transition-opacity duration-200")}
-      title="Email Content"
-      sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-scripts"
-      style={{
-        width: "100%",
-        overflow: "auto",
-      }}
-    />
+    <>
+      {!loaded && (
+        <div className="flex h-full w-full items-center justify-center gap-4 p-8">
+          <Loader2 className="size-4 animate-spin" />
+          <span>Loading email content...</span>
+        </div>
+      )}
+      <iframe
+        height={height}
+        ref={iframeRef}
+        className={cn(
+          "w-full flex-1 overflow-hidden rounded-md border-none transition-opacity duration-200",
+          loaded ? "opacity-100" : "opacity-0",
+        )}
+        title="Email Content"
+        sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-scripts"
+        style={{
+          width: "100%",
+          overflow: "auto",
+        }}
+      />
+    </>
   );
 }
