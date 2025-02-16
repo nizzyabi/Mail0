@@ -1,44 +1,61 @@
+"use client";
+
 import { SettingsNavigation } from "./settings-navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
   return (
-    <div className="w-full bg-sidebar p-2">
-      <div className="h-full bg-background md:rounded-md md:border">
-        <ScrollArea className="h-full max-h-full" type="auto">
-          <div className="min-h-[calc(100vh-64px)] max-w-4xl p-8 pt-0">
-            <div className="sticky top-0 space-y-4 bg-background pb-6 pt-8">
-              <div className="flex w-full max-w-2xl items-center justify-between">
-                <div className="space-y-1">
-                  <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
-                  <p className="text-muted-foreground">Manage your account and preferences.</p>
-                </div>
-                <Image
-                  alt="mail0 logo"
-                  src={"/assets/m0%20rounded%20edges.svg"}
-                  width={46}
-                  height={46}
-                />
+    <div className="min-h-screen w-full bg-background">
+      <div className="mx-auto max-w-[1600px] p-4 md:p-6 lg:p-8">
+        <div className="sticky top-0 z-20 mb-8 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.back()}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <h1 className="text-2xl font-bold sm:text-3xl">Settings</h1>
+            <p className="text-base text-muted-foreground sm:text-lg">
+              Manage your account and preferences.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-8 md:flex-row">
+          <SettingsNavigation />
+
+          <div className="flex-1">
+            <ScrollArea className="h-full">
+              <div className="min-h-[calc(100vh-300px)]">{children}</div>
+
+              <div className="mt-12 flex items-center gap-3.5 text-sm text-muted-foreground">
+                <span>Mail0 Build #00000</span>
+                <div className="h-4 w-[1px] bg-border" />
+                <Link href="/privacy" className="hover:text-foreground">
+                  Privacy Policy
+                </Link>
+                <div className="h-4 w-[1px] bg-border" />
+                <Link href="/terms" className="hover:text-foreground">
+                  Terms of Service
+                </Link>
               </div>
-              <SettingsNavigation />
-            </div>
-            {children}
+            </ScrollArea>
           </div>
-          <div className="mb-12 flex items-center gap-3.5 px-8 text-sm text-muted-foreground">
-            <span>
-              {/* TODO: Add build number / version */}
-              Mail0 Build #00000
-            </span>
-            <Link href="/privacy" className="underline-offset-2 hover:underline">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="underline-offset-2 hover:underline">
-              Terms of Service
-            </Link>
-          </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
