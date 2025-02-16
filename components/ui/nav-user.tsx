@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  ChevronRight,
-  Laptop,
-  LogIn,
-  LogOut,
-  Moon,
-  Sun,
-  UserCog,
-  UserPlus,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, LogIn, LogOut, UserCog, UserPlus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -24,11 +14,10 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ModeToggle } from "@/components/theme/mode-toggle";
 import { useConnections } from "@/hooks/use-connections";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { IConnection } from "@/types";
 import { useMemo } from "react";
 import Image from "next/image";
@@ -39,7 +28,6 @@ export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
   const { data: connections, isLoading, mutate } = useConnections();
-  const { theme, setTheme } = useTheme();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
@@ -196,19 +184,7 @@ export function NavUser() {
           </>
         )}
         <span className="mt-2 block w-full">
-          <Tabs defaultValue={theme} className="w-full">
-            <TabsList className="grid h-min w-full grid-cols-3">
-              <TabsTrigger value="dark" onClick={() => setTheme("dark")} className="py-1">
-                <Moon strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
-              </TabsTrigger>
-              <TabsTrigger value="light" onClick={() => setTheme("light")} className="py-1">
-                <Sun strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
-              </TabsTrigger>
-              <TabsTrigger value="system" onClick={() => setTheme("system")} className="py-1">
-                <Laptop strokeWidth={2} className="h-5 w-5 opacity-70" aria-hidden="true" />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ModeToggle showLabels={false} className="h-fit" />
         </span>
       </DropdownMenuContent>
     </DropdownMenu>

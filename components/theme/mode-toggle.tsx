@@ -29,22 +29,34 @@ export function ModeToggle({
   return (
     <ToggleGroup
       type="single"
-      className={cn("h-9 justify-start", className)}
+      className={cn("h-9 max-w-xs justify-start", className)}
       suppressHydrationWarning
       value={theme}
       onValueChange={setTheme}
     >
-      <ToggleGroupItem suppressHydrationWarning value="light" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="light"
+        className="flex flex-1 items-center gap-2"
+      >
         <Sun className="h-5 w-5" />
         {showLabels ? "Light" : <span className="sr-only">Light</span>}
       </ToggleGroupItem>
 
-      <ToggleGroupItem suppressHydrationWarning value="dark" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="dark"
+        className="flex flex-1 items-center gap-2"
+      >
         <Moon className="h-5 w-5" />
         {showLabels ? "Dark" : <span className="sr-only">Dark</span>}
       </ToggleGroupItem>
 
-      <ToggleGroupItem suppressHydrationWarning value="system" className="flex items-center gap-2">
+      <ToggleGroupItem
+        suppressHydrationWarning
+        value="system"
+        className="flex flex-1 items-center gap-2"
+      >
         <Laptop className="h-5 w-5" />
         {showLabels ? "System" : <span className="sr-only">System</span>}
       </ToggleGroupItem>

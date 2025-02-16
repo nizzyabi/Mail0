@@ -17,10 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
-import { toast } from "sonner";
 
 export default function ConnectionsPage() {
-  const { data: connections, mutate, isLoading } = useConnections();
+  const { data: connections, isLoading } = useConnections();
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
 
   const emailProviders = [

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { ReactNode } from "react";
 
 interface SettingsCardProps {
@@ -8,7 +8,7 @@ interface SettingsCardProps {
   className?: string;
 }
 
-export function SettingsCard({ title, description, children, className }: SettingsCardProps) {
+export function SettingsCard({ description, children, className }: SettingsCardProps) {
   return (
     <Card className={`max-w-2xl border-none ${className}`}>
       <CardHeader>

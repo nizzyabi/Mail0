@@ -3,30 +3,27 @@
 import { SettingsNavigation } from "./settings-navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <div className="mx-auto w-full max-w-[1600px] flex-1 p-4 pb-0 md:p-6 md:pb-0 lg:p-8 lg:pb-0">
-        <div className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 pb-8 pt-4 backdrop-blur duration-200 supports-[backdrop-filter]:bg-background/60 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="gap-2 text-muted-foreground transition-colors hover:text-foreground"
-            >
+        <div className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 pb-4 pt-4 backdrop-blur duration-200 supports-[backdrop-filter]:bg-background/60 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-muted-foreground transition-colors hover:text-foreground"
+            asChild
+          >
+            <Link href="/mail">
               <ArrowLeft className="h-4 w-4" />
               Back
-            </Button>
-          </div>
+            </Link>
+          </Button>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-1.5">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
             <p className="text-base text-muted-foreground sm:text-lg">
               Manage your account and preferences.
@@ -40,8 +37,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           </div>
 
           <div className="flex-1">
-            <ScrollArea className="h-[calc(100vh-360px)] pb-4 md:h-[calc(100vh-320px)]">
-              {children}
+            <ScrollArea className="h-[calc(100vh-312px)] md:h-[calc(100vh-272px)]">
+              <div className="pb-12">{children}</div>
             </ScrollArea>
           </div>
         </div>

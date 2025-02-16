@@ -135,7 +135,7 @@ export function Mail({ folder }: MailProps) {
                 <div className="sticky top-0 z-10 bg-background pt-[6px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
-                      <SidebarToggle className="h-fit px-2 md:hidden" />
+                      <SidebarToggle className="h-fit px-2" />
                       <Suspense>
                         <ComposeButton />
                       </Suspense>
