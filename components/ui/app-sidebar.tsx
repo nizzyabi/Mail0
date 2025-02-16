@@ -130,8 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             suffix: ChevronDown,
             subItems: settingsPages.map((page) => ({
               title: page.title,
-              url: page.url,
-              isActive: pathname === page.url,
+              url: `${page.url}?from=${pathname}`,
             })),
           },
           // {
