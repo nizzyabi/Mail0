@@ -2,6 +2,7 @@
 
 import { SettingsNavigation } from "./settings-navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -9,6 +10,9 @@ import Link from "next/link";
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnPath = searchParams.get("from") || "/mail";
+  const mailPath = returnPath.startsWith("/settings") ? "/mail" : returnPath;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -18,7 +22,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.back()}
+              onClick={() => router.push(mailPath)}
               className="gap-2 text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />

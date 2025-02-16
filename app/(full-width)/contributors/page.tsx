@@ -123,7 +123,7 @@ export default function OpenPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="border-neutral-800 bg-transparent text-white hover:bg-neutral-800 sm:hidden"
+                  className="bg-transparent text-neutral-800 dark:border-neutral-800 dark:text-white dark:hover:bg-neutral-800 sm:hidden"
                 >
                   <Link href="https://github.com/nizzyabi/mail0" target="_blank" className="gap-2">
                     <Github className="h-4 w-4" />
