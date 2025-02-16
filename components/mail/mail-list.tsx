@@ -300,6 +300,8 @@ function getDefaultBadgeStyle(label: string): ComponentProps<typeof Badge>["vari
       return "updates";
     case "work":
       return "default";
+    case "forums":
+      return "forums";
     default:
       return "secondary";
   }
