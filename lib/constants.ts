@@ -55,9 +55,11 @@ export const ALLOWED_HTML_STYLES = {
   },
 };
 
-export const EMAIL_HTML_TEMPLATE = `<!DOCTYPE html>
+export const EMAIL_HTML_TEMPLATE = `
+<!DOCTYPE html>
   <html>
     <head>
+      <base target="_blank" />
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <style>
@@ -66,38 +68,14 @@ export const EMAIL_HTML_TEMPLATE = `<!DOCTYPE html>
           padding: 16px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
           line-height: 1.5;
-          color: var(--foreground);
-          background: var(--background);
         }
-        img { max-width: 100%; height: auto; }
-        pre, code { 
-          background: var(--secondary);
-          padding: 0.2em 0.4em;
-          border-radius: 3px;
-          font-size: 0.9em;
+        .auto-details summary::marker {
+           content: "...";
+           cursor: pointer;
         }
-        pre code {
-          background: none;
-          padding: 0;
-        }
-        blockquote {
-          margin: 0;
-          padding-left: 1em;
-          border-left: 3px solid var(--border);
-          color: var(--muted-foreground);
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        th, td {
-          padding: 8px;
-          border: 1px solid var(--border);
-        }
-        a { color: var(--primary); }
       </style>
     </head>
     <body>
-      {{content}}
+
     </body>
   </html>`;

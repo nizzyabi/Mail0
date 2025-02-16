@@ -8,14 +8,18 @@ export function MailIframe({ html }: { html: string }) {
   const [height, setHeight] = useState(300);
   const { resolvedTheme } = useTheme();
 
+  const iframeDoc = useMemo(() => template(html), [html]);
+
   useEffect(() => {
     if (!iframeRef.current) return;
-    iframeRef.current.src = html;
+    const url = URL.createObjectURL(new Blob([iframeDoc], { type: "text/html" }));
+    iframeRef.current.src = url;
     iframeRef.current.onload = () => {
       setHeight(iframeRef.current?.contentWindow?.document.body.scrollHeight || 300);
       if (iframeRef.current?.contentWindow?.document.body)
         fixNonReadableColors(iframeRef.current.contentWindow.document.body);
     };
+    return () => URL.revokeObjectURL(url);
   }, [html]);
 
   useEffect(() => {

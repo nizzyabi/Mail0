@@ -44,6 +44,7 @@ export interface ParsedMessage {
   body: string;
   processedHtml: string;
   blobUrl: string;
+  decodedBody?: string;
 }
 
 export interface IConnection {

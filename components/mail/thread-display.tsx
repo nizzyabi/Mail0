@@ -13,20 +13,19 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import React from "react";
-
 import { DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState, useEffect, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useThread } from "@/hooks/use-threads";
 import MailDisplay from "./mail-display";
 import { useMail } from "./use-mail";
 import { Badge } from "../ui/badge";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
+import React from "react";
 
 interface ThreadDisplayProps {
   mail: string | null;
@@ -107,7 +106,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
     <div className="flex h-screen flex-col">
       <div
         className={cn(
-          "relative flex h-full flex-col transition-all duration-300",
+          "relative flex h-full flex-col bg-background transition-all duration-300",
           isMobile ? "" : "rounded-r-lg",
           isFullscreen ? "fixed inset-0 z-50 bg-background" : "",
         )}

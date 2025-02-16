@@ -228,7 +228,9 @@ const googleDriver = async (config: IConfig): Promise<MailManager> => {
           ...parsedData,
           body: bodyData,
           processedHtml: "",
-          blobUrl: `data:text/html;charset=utf-8,${encodeURIComponent(decodedBody)}`,
+          // blobUrl: `data:text/html;charset=utf-8,${encodeURIComponent(decodedBody)}`,
+          blobUrl: "",
+          decodedBody,
         };
 
         // Log the result for debugging

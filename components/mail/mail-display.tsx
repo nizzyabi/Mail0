@@ -1,6 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { SubmitHandler, useForm } from "react-hook-form";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { BellOff, Lock } from "lucide-react";
 import { Separator } from "../ui/separator";
@@ -27,35 +26,16 @@ type FormInputs = {
 const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    // formState: { errors },
-  } = useForm<FormInputs>({
-    defaultValues: {
-      replyText: "",
-      attachments: undefined,
-    },
-  });
-
-  // Watch form values for visibility control
-  const replyText = watch("replyText");
-  const attachmentField = watch("attachments");
-
-  const onSubmit: SubmitHandler<FormInputs> = (data) => console.log(data);
-
   useEffect(() => {
-    // First message in the thread should be expanded by default
     if (index === 0) {
       setIsCollapsed(false);
     }
   }, [index]);
+
   return (
     <div
       className={cn(
-        "relative m-4 flex-1 overflow-hidden rounded-lg border border-border bg-[#18181A] p-4",
+        "relative m-4 flex-1 overflow-hidden rounded-lg border border-border bg-muted p-4",
         isFullscreen && "h-[calc(100vh-4rem)]",
       )}
     >
@@ -163,11 +143,11 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Pro
         >
           <div className="min-h-0 overflow-hidden">
             <div className="flex h-full w-full flex-1 flex-col p-0">
-              {emailData.blobUrl ? (
+              {emailData.decodedBody ? (
                 // <p className="flex h-[500px] w-full items-center justify-center">
                 //   There should be an iframe in here
                 // </p>
-                <MailIframe html={emailData.blobUrl} />
+                <MailIframe html={emailData.decodedBody} />
               ) : (
                 <div
                   className="flex h-[500px] w-full items-center justify-center"
