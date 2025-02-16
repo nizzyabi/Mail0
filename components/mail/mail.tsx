@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  AlignVerticalSpaceAround,
-  ArchiveX,
-  BellOff,
-  Check,
-  ListFilter,
-  SquarePen,
-  X,
-} from "lucide-react";
-import { useState, useCallback, useMemo, useEffect, ReactNode, Suspense } from "react";
+import { AlignVerticalSpaceAround, ArchiveX, BellOff, Check, ListFilter, X } from "lucide-react";
+
+import { useState, useCallback, useMemo, useEffect, ReactNode, Suspense, useRef } from "react";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { MailDisplay } from "@/components/mail/mail-display";
@@ -37,6 +30,7 @@ import { useThreads } from "@/hooks/use-threads";
 import { SearchBar } from "./search-bar";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SquarePenIcon, SquarePenIconHandle } from "../icons/animated/square-pen";
 
 interface MailProps {
   accounts: {
@@ -135,7 +129,7 @@ export function Mail({ folder }: MailProps) {
                 <div className="sticky top-0 z-10 bg-background pt-[6px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
-                      <SidebarToggle className="h-fit px-2" />
+                      <SidebarToggle className="h-fit px-2 md:hidden" />
                       <Suspense>
                         <ComposeButton />
                       </Suspense>
@@ -259,9 +253,17 @@ export function Mail({ folder }: MailProps) {
 
 function ComposeButton() {
   const { open } = useOpenComposeModal();
+  const penRef = useRef<SquarePenIconHandle>(null);
+
   return (
-    <Button onClick={open} variant="ghost" className="h-fit px-2">
-      <SquarePen />
+    <Button
+      onClick={open}
+      variant="ghost"
+      className="h-fit px-2"
+      onMouseEnter={() => penRef.current?.startAnimation()}
+      onMouseLeave={() => penRef.current?.stopAnimation()}
+    >
+      <SquarePenIcon ref={penRef} />
     </Button>
   );
 }

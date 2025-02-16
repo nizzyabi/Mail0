@@ -6,9 +6,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, SlidersHorizontal, CalendarIcon } from "lucide-react";
+import { SlidersHorizontal, CalendarIcon } from "lucide-react";
 import { useSearchValue } from "@/hooks/use-search-value";
 import { Separator } from "@/components/ui/separator";
+import { SearchIcon } from "../icons/animated/search";
 import { Calendar } from "@/components/ui/calendar";
 import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,7 @@ export function SearchBar() {
     <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
       <form className="relative flex items-center">
         <Form {...form}>
-          <Search
+          <SearchIcon
             className="absolute left-2 h-3.5 w-3.5 text-muted-foreground/70"
             aria-hidden="true"
           />
@@ -115,7 +116,7 @@ export function SearchBar() {
             {...form.register("q")}
           />
           <div className="absolute right-2 flex items-center">
-            <Popover>
+            {/* <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-5 w-5 p-0 hover:bg-transparent">
                   <SlidersHorizontal
@@ -131,7 +132,7 @@ export function SearchBar() {
                 align="end"
               >
                 <div className="space-y-4">
-                  {/* Quick Filters */}
+               
                   <div>
                     <h2 className="mb-2 text-xs font-medium text-muted-foreground">
                       Quick Filters
@@ -151,7 +152,7 @@ export function SearchBar() {
 
                   <Separator className="my-2" />
 
-                  {/* Main Filters */}
+         
                   <div className="grid gap-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-muted-foreground">Search in</label>
@@ -200,7 +201,7 @@ export function SearchBar() {
 
                   <Separator className="my-2" />
 
-                  {/* Labels */}
+          
                   <div>
                     <h2 className="mb-2 text-xs font-medium text-muted-foreground">Labels</h2>
                     <div className="flex flex-wrap gap-1.5">
@@ -223,7 +224,6 @@ export function SearchBar() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex items-center justify-between pt-2">
                     <Button onClick={resetSearch} variant="ghost" size="sm" className="h-7 text-xs">
                       Reset
@@ -234,7 +234,7 @@ export function SearchBar() {
                   </div>
                 </div>
               </PopoverContent>
-            </Popover>
+            </Popover> */}
           </div>
         </Form>
       </form>
