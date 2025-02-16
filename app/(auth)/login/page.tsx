@@ -61,19 +61,19 @@ export default function Login() {
             Log In with Google
           </Button>
           <Button
-             onClick={async () => {
-                toast.promise(
-                  signIn.social({
-                    provider: "github",
-                    callbackURL: "/mail",
-                  }),
-                  {
-                    loading: "Redirecting...",
-                    success: "Redirected successfully!",
-                    error: "Login redirect failed",
-                  },
-                );
-              }}
+            onClick={async () => {
+              toast.promise(
+                signIn.social({
+                  provider: "github",
+                  callbackURL: "/mail",
+                }),
+                {
+                  loading: "Redirecting...",
+                  success: "Redirected successfully!",
+                  error: "Login redirect failed",
+                },
+              );
+            }}
             className="h-9 w-full bg-gradient-to-b from-primary/85 via-primary to-primary/85 hover:bg-primary/40"
           >
             <GitHub />
