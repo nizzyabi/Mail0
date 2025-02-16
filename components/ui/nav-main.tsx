@@ -80,7 +80,7 @@ export function NavMain({ items }: NavMainProps) {
                   className={cn(
                     "flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                     (item.isActive || isUrlActive(item.url)) &&
-                      "bg-accent/90 font-bold text-accent-foreground",
+                      "bg-accent/90 font-semibold text-accent-foreground",
                   )}
                   onMouseEnter={() => {
                     const iconRef = iconRefs.current[item.title]?.current;

@@ -147,12 +147,12 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
     <div className="flex h-full flex-col">
       <div
         className={cn(
-          "flex h-full flex-col transition-all duration-300",
-          isMobile ? "" : "rounded-r-lg pt-[6px]",
+          "relative flex h-full flex-col transition-all duration-300",
+          isMobile ? "" : "rounded-r-lg",
           isFullscreen ? "fixed inset-0 z-50 bg-background" : "",
         )}
       >
-        <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background/95 px-4 pb-[7.5px] pt-[0.5px] backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background !py-2 px-2">
           <div className="flex flex-1 items-center gap-2">
             {!isMobile && (
               <Tooltip>
@@ -310,19 +310,12 @@ export function MailDisplay({ mail, onClose, isMobile }: MailDisplayProps) {
             </div>
           </div>
         </div>
-        <div className="group sticky bottom-0 left-0 right-0 z-50 bg-background">
-          <div className="absolute bottom-0 left-0 right-0 flex h-8 cursor-pointer items-center justify-center bg-gradient-to-t from-background to-transparent">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground">
-              <Reply className="h-4 w-4" />
-              <span>Reply to email</span>
-            </div>
-          </div>
-
+        <div className="group absolute bottom-0 left-0 right-0 z-50 overflow-hidden border-t border-transparent transition-colors focus-within:border-border focus-within:bg-background hover:border-border hover:bg-background">
           <form
             className={cn(
-              "relative mx-4 mb-4 space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm transition-all duration-200 ease-in-out",
+              "relative m-4 space-y-2.5 rounded-[calc(var(--radius)-2px)] border bg-secondary/50 p-4 shadow-sm transition-all duration-200 ease-in-out",
               replyText === "" && (!attachmentField || attachmentField.length === 0)
-                ? "invisible translate-y-16 opacity-0 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+                ? "invisible translate-y-16 opacity-0 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
                 : "visible translate-y-0 opacity-100",
             )}
             onSubmit={handleSubmit(onSubmit)}

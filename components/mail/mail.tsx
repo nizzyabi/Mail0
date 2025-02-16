@@ -9,7 +9,7 @@ import {
   SquarePen,
   X,
 } from "lucide-react";
-import { useState, useCallback, useMemo, useEffect, ReactNode, Suspense } from "react";
+import { useState, useCallback, useMemo, useEffect, ReactNode } from "react";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { MailDisplay } from "@/components/mail/mail-display";
@@ -132,13 +132,11 @@ export function Mail({ folder }: MailProps) {
           <ResizablePanel defaultSize={isMobile ? 100 : 35} minSize={isMobile ? 100 : 35}>
             <div className="flex-1 overflow-y-auto">
               <div>
-                <div className="sticky top-0 z-10 bg-background pt-[6px]">
+                <div className="sticky top-0 z-10 bg-background pt-[8px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
                       <SidebarToggle className="h-fit px-2" />
-                      <Suspense>
-                        <ComposeButton />
-                      </Suspense>
+                      <ComposeButton />
                     </div>
                     {mail.bulkSelected.length === 0 ? (
                       <>
@@ -195,7 +193,7 @@ export function Mail({ folder }: MailProps) {
                   <Separator className="mt-2" />
                 </div>
 
-                <div className="h-[calc(100svh-(8px+8px+6px+47px-2px))] overflow-scroll rounded-b-sm bg-background">
+                <div className="h-[calc(100svh-(8px+8px+6px+44px-2px))] overflow-scroll rounded-b-sm bg-background">
                   {isLoading || isTransitioning ? (
                     <div className="flex flex-col">
                       {[...Array(8)].map((_, i) => (
@@ -229,7 +227,7 @@ export function Mail({ folder }: MailProps) {
 
           {isDesktop && mail.selected && (
             <>
-              <ResizableHandle withHandle />
+              <ResizableHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
                 <div className="hidden h-full flex-1 overflow-y-auto md:block">
                   <MailDisplay mail={mail.selected} onClose={handleClose} />

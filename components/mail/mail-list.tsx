@@ -51,7 +51,7 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
       return i % 2 === 1 ? (
         <span
           key={i}
-          className="ring-0.5 mx-0.5 inline-flex items-center justify-center rounded bg-black px-1 py-0.5 text-white ring-yellow-300/70 dark:bg-white dark:text-black dark:ring-yellow-300/50"
+          className="ring-0.5 inline-flex items-center justify-center rounded bg-primary/10 px-1"
         >
           {part}
         </span>
@@ -134,10 +134,11 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
       onMouseLeave={handleMouseLeave}
       key={message.id}
       className={cn(
-        "group flex cursor-pointer flex-col items-start border-b px-4 py-4 text-left text-sm transition-all hover:bg-accent",
+        "group flex cursor-pointer flex-col items-start p-3.5 text-left text-sm transition-all hover:bg-accent",
         message.unread && "",
-        isMailSelected ? "bg-accent" : "",
+        isMailSelected ? "border-border bg-accent" : "",
         isMailBulkSelected && "bg-muted shadow-[inset_5px_0_0_-1px_hsl(var(--primary))]",
+        isCompact && "py-2",
       )}
     >
       <div className="flex w-full items-center justify-between">
@@ -155,13 +156,18 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
             {message.unread ? <span className="ml-0.5 size-2 rounded-full bg-blue-500" /> : null}
           </p>
         </div>
-        <p className="pr-2 text-xs font-normal opacity-70 transition-opacity group-hover:opacity-100">
+        <p
+          className={cn(
+            "pr-2 text-xs font-normal opacity-70 transition-opacity group-hover:opacity-100",
+            isMailSelected && "opacity-100",
+          )}
+        >
           {formatDate(message.receivedOn)}
         </p>
       </div>
       <p
         className={cn(
-          "mt-1 text-xs font-medium opacity-70 transition-opacity",
+          "mt-1 text-xs opacity-70 transition-opacity",
           isCompact && "line-clamp-1",
           isMailSelected && "opacity-100",
         )}
@@ -232,10 +238,10 @@ export function MailList({ items, isCompact, folder }: MailListProps) {
   }
 
   return (
-    <ScrollArea className="h-full" type="auto">
+    <ScrollArea className="h-full" type="scroll">
       <div
         className={cn(
-          "flex flex-col pt-0",
+          "flex flex-col",
           // Prevents accidental text selection while in range select mode.
           selectMode === "range" && "select-none",
         )}
@@ -258,7 +264,7 @@ function MailLabels({ labels }: { labels: string[] }) {
   if (!labels.length) return null;
 
   return (
-    <div className={cn("mt-2 flex select-none items-center gap-2")}>
+    <div className={cn("mt-1.5 flex select-none items-center gap-2")}>
       {labels.map((label) => (
         <Badge key={label} className="rounded-md" variant={getDefaultBadgeStyle(label)}>
           <p className="text-xs font-medium lowercase opacity-70">{label.replace(/_/g, " ")}</p>

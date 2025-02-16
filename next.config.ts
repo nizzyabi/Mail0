@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
         destination: "/settings/general",
         permanent: true,
       },
+      {
+        source: "/mail",
+        destination: "/mail/inbox",
+        permanent: true,
+      },
     ];
   },
 };

@@ -4,6 +4,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/component
 import { SettingsGearIcon } from "../icons/animated/settings-gear";
 import { CheckCheckIcon } from "../icons/animated/check-check";
 import { MessageCircleIcon } from "../icons/animated/message";
+import { SidebarThemeSwitch } from "./sidebar-theme-switch";
 import { BookTextIcon } from "../icons/animated/book-text";
 import { ArchiveIcon } from "../icons/animated/archive";
 import { UsersIcon } from "../icons/animated/users";
@@ -43,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Inbox",
-            url: "/mail",
+            url: "/mail/inbox",
             icon: InboxIcon,
             badge: stats?.[0] ?? 0,
           },
@@ -139,8 +140,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="mt-2 flex items-center justify-between gap-2">
         <NavUser />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="justify-between">
         <NavMain items={navItems} />
+        <div className="p-3">
+          <SidebarThemeSwitch />
+        </div>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
