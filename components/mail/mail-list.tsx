@@ -4,11 +4,11 @@ import { preloadThread, useMarkAsRead } from "@/hooks/use-threads";
 import { useSearchValue } from "@/hooks/use-search-value";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useKeyPressed } from "@/hooks/use-key-pressed";
-import { InitialThread, ParsedMessage } from "@/types";
 import { useMail } from "@/components/mail/use-mail";
 import { useSession } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate } from "@/lib/utils";
+import { InitialThread } from "@/types";
 
 interface MailListProps {
   items: InitialThread[];
