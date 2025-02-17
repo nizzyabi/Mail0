@@ -6,15 +6,21 @@ import { cn } from "@/lib/utils";
 import * as React from "react";
 import Link from "next/link";
 
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  ref?: React.Ref<SVGSVGElement>;
+  startAnimation?: () => void;
+  stopAnimation?: () => void;
+}
+
 interface NavItemProps {
   title: string;
   url: string;
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<IconProps>;
   badge?: number;
   isActive?: boolean;
   isExpanded?: boolean;
-  onClick?: (e: React.MouseEvent) => void;
-  suffix?: React.ComponentType<any>;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  suffix?: React.ComponentType<IconProps>;
   subItems?: Array<{
     title: string;
     url: string;
@@ -29,19 +35,23 @@ interface NavMainProps {
   }[];
 }
 
+type IconRefType = SVGSVGElement & {
+  startAnimation?: () => void;
+  stopAnimation?: () => void;
+};
+
 export function NavMain({ items }: NavMainProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Create refs for each icon
-  const iconRefs = useRef<{ [key: string]: React.RefObject<any> }>({});
+  const iconRefs = useRef<{ [key: string]: React.RefObject<IconRefType | null> }>({});
 
   // Initialize refs for all items
   useEffect(() => {
     items.forEach((section) => {
       section.items.forEach((item) => {
         if (item.icon && !iconRefs.current[item.title]) {
-          iconRefs.current[item.title] = React.createRef();
+          iconRefs.current[item.title] = React.createRef<IconRefType>();
         }
       });
     });

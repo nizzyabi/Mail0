@@ -1,6 +1,12 @@
 "use client";
 
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   AlignVerticalSpaceAround,
   ArchiveX,
   BellOff,
@@ -9,34 +15,24 @@ import {
   SquarePen,
   X,
 } from "lucide-react";
-import { useState, useCallback, useMemo, useEffect, ReactNode } from "react";
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { MailDisplay } from "@/components/mail/mail-display";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { useState, useCallback, useMemo, useEffect, ReactNode } from "react";
+import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
+import { ThreadDisplay } from "@/components/mail/thread-display";
+import { useMediaQuery } from "../../hooks/use-media-query";
+import { useSearchValue } from "@/hooks/use-search-value";
 import { MailList } from "@/components/mail/mail-list";
 import { Separator } from "@/components/ui/separator";
 import { useMail } from "@/components/mail/use-mail";
-import { Button } from "@/components/ui/button";
-
-// Filters imports
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
-import { useMediaQuery } from "../../hooks/use-media-query";
-import { useSearchValue } from "@/hooks/use-search-value";
 import { SidebarToggle } from "../ui/sidebar-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Mail } from "@/components/mail/data";
 import { useSearchParams } from "next/navigation";
 import { useThreads } from "@/hooks/use-threads";
+import { Button } from "@/components/ui/button";
 import { SearchBar } from "./search-bar";
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MailProps {
   accounts: {
@@ -215,7 +211,7 @@ export function Mail({ folder }: MailProps) {
                     </div>
                   ) : (
                     <MailList
-                      items={threadsResponse?.messages || []}
+                      items={threadsResponse?.threads || []}
                       isCompact={isCompact}
                       folder={folder}
                     />
@@ -229,8 +225,8 @@ export function Mail({ folder }: MailProps) {
             <>
               <ResizableHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
-                <div className="hidden h-full flex-1 overflow-y-auto md:block">
-                  <MailDisplay mail={mail.selected} onClose={handleClose} />
+                <div className="hidden h-[calc(100vh-(8px+8px))] flex-1 md:block">
+                  <ThreadDisplay mail={mail.selected} onClose={handleClose} />
                 </div>
               </ResizablePanel>
             </>
@@ -245,7 +241,7 @@ export function Mail({ folder }: MailProps) {
                 <DrawerTitle>Email Details</DrawerTitle>
               </DrawerHeader>
               <div className="flex h-full flex-col overflow-hidden">
-                <MailDisplay mail={mail.selected} onClose={handleClose} isMobile={true} />
+                <ThreadDisplay mail={mail.selected} onClose={handleClose} isMobile={true} />
               </div>
             </DrawerContent>
           </Drawer>

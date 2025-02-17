@@ -92,7 +92,7 @@ We're just getting started. If you're excited about a future where **email belon
 Mail0.io is built with modern and reliable technologies:
 
 - **Frontend**: Next.js, React, TypeScript, TailwindCSS, ShadCN
-- **Backend**: Node.js, Prisma
+- **Backend**: Node.js, Drizzle ORM
 - **Database**: PostgreSQL
 - **Authentication**: Better Auth, Google OAuth
 <!-- - **Testing**: Jest, React Testing Library -->

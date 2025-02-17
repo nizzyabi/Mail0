@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useConnections } from "@/hooks/use-connections";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { IConnection } from "@/types";
 import { useMemo } from "react";
 import Image from "next/image";
@@ -23,6 +23,7 @@ export function NavUser() {
   const { data: session, refetch } = useSession();
   const router = useRouter();
   const { data: connections, isLoading, mutate } = useConnections();
+  const pathname = usePathname();
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
@@ -170,7 +171,7 @@ export function NavUser() {
               ))}
               <DropdownMenuItem
                 className="mt-1 cursor-pointer"
-                onClick={() => router.push("/settings/connections")}
+                onClick={() => router.push(`/settings/connections?from=${pathname}`)}
               >
                 <div className="flex items-center gap-2">
                   <UserPlus size={16} strokeWidth={2} className="opacity-60" aria-hidden="true" />

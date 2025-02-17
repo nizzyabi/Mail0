@@ -90,7 +90,7 @@ export default function DeveloperPage() {
             <div className="space-y-4">
               <h1 className="text-2xl font-bold sm:text-3xl">Developer Resources</h1>
               <p className="text-base text-muted-foreground sm:text-lg">
-                Everything you need to build with Mail0's APIs and tools.
+                Everything you need to build with Mail0&apos;s APIs and tools.
               </p>
             </div>
           </div>
@@ -133,7 +133,8 @@ export default function DeveloperPage() {
               <div className="flex-1 space-y-1">
                 <h3 className="text-lg font-semibold sm:text-xl">Need Help?</h3>
                 <p className="text-sm text-muted-foreground">
-                  Can't find what you're looking for? Get in touch with our developer support team.
+                  Can&apos;t find what you&apos;re looking for? Get in touch with our developer
+                  support team.
                 </p>
               </div>
               <Button asChild variant="default" className="w-full sm:w-auto">

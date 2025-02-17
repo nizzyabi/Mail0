@@ -1,27 +1,22 @@
 "use client";
 
-import { LaptopMinimalIcon, MoonIcon, SunIcon } from "lucide-react";
-import * as SelectPrimitive from "@radix-ui/react-select";
 import { useTheme } from "next-themes";
 
-import { Select, SelectContent, SelectItem } from "@/components/ui/select";
+import { MoonIcon } from "../icons/animated/moon";
 import { Button } from "@/components/ui/button";
+import { SunIcon } from "../icons/animated/sun";
 
 export function SidebarThemeSwitch() {
-  const { theme, systemTheme, resolvedTheme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
 
-  async function handleThemeChange(newTheme: string) {
-    let nextResolvedTheme = newTheme;
-
-    if (newTheme === "system" && systemTheme) {
-      nextResolvedTheme = systemTheme;
-    }
+  async function handleThemeToggle() {
+    const newTheme = theme === "dark" ? "light" : "dark";
 
     function update() {
       setTheme(newTheme);
     }
 
-    if (document.startViewTransition && nextResolvedTheme !== resolvedTheme) {
+    if (document.startViewTransition && newTheme !== resolvedTheme) {
       document.documentElement.style.viewTransitionName = "theme-transition";
       await document.startViewTransition(update).finished;
       document.documentElement.style.viewTransitionName = "";
@@ -31,23 +26,13 @@ export function SidebarThemeSwitch() {
   }
 
   return (
-    <Select value={theme} onValueChange={handleThemeChange}>
-      <SelectPrimitive.Trigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-        >
-          {theme === "dark" && <MoonIcon />}
-          {theme === "light" && <SunIcon />}
-          {theme === "system" && <LaptopMinimalIcon />}
-        </Button>
-      </SelectPrimitive.Trigger>
-      <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
-        <SelectItem value="light">Light</SelectItem>
-        <SelectItem value="dark">Dark</SelectItem>
-        <SelectItem value="system">System</SelectItem>
-      </SelectContent>
-    </Select>
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={handleThemeToggle}
+      className="!cursor-pointer text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+    >
+      {theme === "dark" ? <MoonIcon /> : <SunIcon />}
+    </Button>
   );
 }

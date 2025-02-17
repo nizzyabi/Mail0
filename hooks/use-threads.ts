@@ -7,7 +7,7 @@ import { idb } from "@/lib/idb";
 
 export const preloadThread = (userId: string, threadId: string) => {
   console.log(`🔄 Prefetching email ${threadId}...`);
-  preload([userId, threadId], fetchEmail);
+  preload([userId, threadId], fetchThread);
 };
 
 const threadsCache = {
@@ -101,7 +101,7 @@ const fetchEmails = async (args: any[]) => {
     baseURL: BASE_URL,
     onSuccess(context) {
       // reversing the order of the messages to make sure the newest ones are at the top
-      threadsCache.bulkPut(context.data.messages, searchParams.toString() + connectionId);
+      // threadsCache.bulkPut(context.data.messages, searchParams.toString() + connectionId);
     },
   }).then((e) => e.data)) as RawResponse;
 };
@@ -113,36 +113,36 @@ const fetchEmailsFromCache = async (args: any[]) => {
   if (query) searchParams.set("q", query);
   if (folder) searchParams.set("folder", folder.toString());
   if (labelIds) searchParams.set("labelIds", labelIds.join(","));
-  const data = await threadsCache.list(searchParams.toString() + connectionId);
-  return { messages: data.reverse() };
+  const data = (await threadsCache.list(searchParams.toString() + connectionId)) as any;
+  return { threads: data.reverse() };
 };
 
-const fetchEmail = async (args: any[]): Promise<ParsedMessage> => {
+const fetchThread = async (args: any[]): Promise<ParsedMessage[]> => {
   const [_, id] = args;
-  const existing = await threadsCache.get(id);
-  if (existing?.blobUrl) return existing as ParsedMessage;
+  // const existing = await threadsCache.get(id);
+  // if (existing?.blobUrl) return existing as ParsedMessage[];
   return await $fetch(`/api/v1/mail/${id}/`, {
     baseURL: BASE_URL,
     onSuccess(context) {
-      threadsCache.update({
-        id,
-        blobUrl: context.data.blobUrl,
-        processedHtml: context.data.processedHtml,
-        body: context.data.body,
-      });
+      // threadsCache.update({
+      //   id,
+      //   blobUrl: context.data.blobUrl,
+      //   processedHtml: context.data.processedHtml,
+      //   body: context.data.body,
+      // });
     },
-  }).then((e) => e.data as ParsedMessage);
+  }).then((e) => e.data as ParsedMessage[]);
 };
 
 // Based on gmail
 interface RawResponse {
   nextPageToken: number;
-  messages: InitialThread[];
+  threads: InitialThread[];
   resultSizeEstimate: number;
 }
 
 interface ThreadsResponse {
-  messages: ParsedMessage[];
+  threads: InitialThread[];
 }
 
 const useCachedThreads = (folder: string, labelIds?: string[], query?: string, max?: number) => {
@@ -167,16 +167,16 @@ export const useThreads = (folder: string, labelIds?: string[], query?: string, 
 
   return {
     data: data ?? cachedThreads,
-    isLoading: cachedThreads?.messages.length ? false : isLoading,
+    isLoading: cachedThreads?.threads.length ? false : isLoading,
     error,
   };
 };
 
 export const useThread = (id: string) => {
   const { data: session } = useSession();
-  const { data, isLoading, error } = useSWR<ParsedMessage>(
+  const { data, isLoading, error } = useSWR<ParsedMessage[]>(
     session?.user.id ? [session.user.id, id, session.connectionId] : null,
-    fetchEmail,
+    fetchThread,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

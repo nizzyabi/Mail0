@@ -23,8 +23,14 @@ export const getCookie = (key: string): string | null => {
 };
 
 export const formatDate = (date: string) => {
-  if (isToday(date)) return format(date, "h:mm a");
-  if (isThisMonth(date) || differenceInCalendarMonths(new Date(), date) === 1)
-    return format(date, "MMM dd");
-  return format(date, "MM/dd/yy");
+  try {
+    if (isToday(date)) return format(date, "h:mm a");
+    if (isThisMonth(date) || differenceInCalendarMonths(new Date(), date) === 1)
+      return format(date, "MMM dd");
+
+    return format(date, "MM/dd/yy");
+  } catch (error) {
+    console.error("Error formatting date", error);
+    return "";
+  }
 };
