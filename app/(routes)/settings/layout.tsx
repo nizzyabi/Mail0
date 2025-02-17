@@ -12,7 +12,7 @@ import Link from "next/link";
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<SettingsLayoutSkeleton />}>
-      <SettingsLayoutContent children={children} />
+      <SettingsLayoutContent>{children}</SettingsLayoutContent>
     </Suspense>
   );
 }
