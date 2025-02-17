@@ -50,7 +50,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
 
   const handleClose = useCallback(() => {
     onClose?.();
-    setMail({ selected: null });
+    setMail({ selected: null, bulkSelected: [] });
   }, [onClose, setMail]);
 
   useEffect(() => {

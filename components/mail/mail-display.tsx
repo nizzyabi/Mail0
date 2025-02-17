@@ -18,7 +18,7 @@ type Props = {
   index: number;
 };
 
-const MailDisplay = ({ emailData, isFullscreen, isMuted, isLoading, index }: Props) => {
+const MailDisplay = ({ emailData, isFullscreen, isMuted, index }: Props) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
