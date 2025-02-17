@@ -1,10 +1,11 @@
 "use client";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { AlignVerticalSpaceAround, Search, Trash2 } from "lucide-react";
+import { AlignVerticalSpaceAround, Trash2 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { SearchIcon } from "../icons/animated/search";
 import { SidebarToggle } from "../ui/sidebar-toggle";
 import { useDrafts } from "./draftHooks/useDrafts";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import * as React from "react";
 
 export function Draft() {
   const { drafts, addDraft, removeDraft } = useDrafts();
+
+  // Todo: store this in cookies / local storage
   const [isCompact, setIsCompact] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<DraftType | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -62,7 +65,7 @@ export function Draft() {
                 <div className="bg-background backdrop-blur supports-[backdrop-filter]:bg-background">
                   <form className="flex space-x-1.5 p-4 pt-0">
                     <div className="flex w-full items-center space-x-3 rounded-md border p-2 px-3">
-                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <SearchIcon />
                       <input
                         type="text"
                         className="w-full flex-1 border-none bg-background outline-none"

@@ -59,6 +59,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     --icon-color: black;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -76,7 +77,7 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 20%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --chart-1: 220 70% 50%;
@@ -163,4 +164,21 @@
 
 .suggestion-highlight {
   @apply bg-blue-200 hover:bg-blue-300 dark:bg-blue-500/40 dark:text-blue-50 dark:hover:bg-blue-400/50;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-new(theme-transition) {
+    clip-path: inset(0 0 100% 0);
+    animation: slide-in-from-top 0.65s forwards cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  ::view-transition-old(theme-transition) {
+    animation: none;
+  }
+
+  @keyframes slide-in-from-top {
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
 }

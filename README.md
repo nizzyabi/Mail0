@@ -10,11 +10,11 @@ Mail0.io is an open-source email solution that gives users the power to **self-h
 
 Most email services today are either **closed-source**, **data-hungry**, or **too complex to self-host**. Mail0.io is different:
 
-✅ **Fully Open-Source** – No hidden agendas, no walled gardens. 100% transparency.  
-🔒 **Data Privacy First** – Your emails, your data. No tracking, no selling, no middlemen.  
+✅ **Fully Open-Source** – No hidden agendas, no walled gardens. 100% transparency.
+🔒 **Data Privacy First** – Your emails, your data. No tracking, no selling, no middlemen.
 ⚙️ **Self-Hosting Freedom** – Run your own email app with ease.
-📬 **Unified Inbox** – Connect multiple email providers like Gmail, Outlook, and more.  
-🎨 **Customizable UI & Features** – Tailor your email experience the way you want it.  
+📬 **Unified Inbox** – Connect multiple email providers like Gmail, Outlook, and more.
+🎨 **Customizable UI & Features** – Tailor your email experience the way you want it.
 🚀 **Developer-Friendly** – Built with extensibility and integrations in mind.
 
 ## Our Mission
@@ -26,22 +26,57 @@ We believe email should be:
 3. **Open** – Transparent development, open collaboration, and community-driven innovation.
 4. **User-Friendly** – No need for technical expertise to get started.
 
+## Documentation
+
+- [License](LICENSE) - Project license and terms
+- [Roadmap](ROADMAP.md) - Development plans and future features
+
 ## Roadmap 🛤️
 
-We're in the early stages of development, and we're shaping the future of Mail0.io **together with the community**. Some key areas we will focus on:
+This document outlines the development roadmap for Mail0.io. Our vision is to create a powerful, user-friendly, and privacy-focused email experience.
 
-- **Core Email Server** – A lightweight, reliable self-hosted email server.
-- **Email Client** – A sleek, customizable web app for managing emails.
-- **Gmail & External Email Integration** – Support for linking third-party email services.
-- **Privacy-Focused Features** – Encryption, tracking protection, and secure authentication.
-- **Developer API** – Extensible tools for building integrations and automations.
+### 1. Core Email Connectivity
+
+- Connect main email providers
+- Support for multiple email accounts
+- Unified inbox experience
+
+### 2. Email Usage Improvements
+
+- AI-powered email assistance
+- Advanced drag-and-drop tools
+- Customizable keyboard shortcuts
+- Performance optimization
+- Enhanced search capabilities
+- Deep customization options
+
+### 3. Infrastructure
+
+- Domain management
+- Optimized email client
+- Self-hosting capabilities
+
+### Development Priorities
+
+1. Building a robust foundation for email management
+2. Implementing user-requested features
+3. Ensuring seamless integration with existing email providers
+4. Maintaining high performance and reliability
+
+We welcome community input and contributions to help shape these features and priorities. If you have suggestions or would like to contribute, please:
+
+1. Open an issue to discuss new feature ideas
+2. Submit pull requests for improvements
+3. Join discussions in existing issues
+
+This roadmap is a living document and will be updated as development progresses and priorities evolve based on community feedback and technological advances.
 
 ## Join the Movement 🚀
 
 Mail0.io is not just another email app—it's a **vision** for a better, more open, and user-controlled email ecosystem. If you believe in **privacy**, **open-source software**, and **giving users control**, we'd love for you to join us!
 
-📢 **Follow our progress** – Stay updated on GitHub as we build Mail0.io.  
-💡 **Contribute** – Share your ideas, suggest features, and help shape the project.  
+📢 **Follow our progress** – Stay updated on GitHub as we build Mail0.io.
+💡 **Contribute** – Share your ideas, suggest features, and help shape the project.
 🤝 **Community-driven** – Our goal is to create an email solution **for the people, by the people**.
 
 ### Stay Tuned!
@@ -52,19 +87,56 @@ We're just getting started. If you're excited about a future where **email belon
 
 🤍 **Mail0.io – Email, Reimagined.**
 
+## Tech Stack
+
+Mail0.io is built with modern and reliable technologies:
+
+- **Frontend**: Next.js, React, TypeScript, TailwindCSS, ShadCN
+- **Backend**: Node.js, Drizzle ORM
+- **Database**: PostgreSQL
+- **Authentication**: Better Auth, Google OAuth
+<!-- - **Testing**: Jest, React Testing Library -->
+
 ## Getting Started
 
 ### Prerequisites
 
+**Required Versions:**
+
+- Node.js >= 18.0.0
+- pnpm >= 8.0.0
+- Docker >= 20.10.0
+
 Before running the application, you'll need to set up several services and environment variables:
 
-1. **Setup Local Services with Docker**
+1. **Setup Local Services with Dev Container and Docker**
 
    - Make sure you have [Docker](https://docs.docker.com/get-docker/), [NodeJS](https://nodejs.org/en/download/), and [pnpm](https://pnpm.io/installation) installed.
-   - Install all dependencies with `pnpm install`
-   - Copy the example env, `cp .env.example .env`
-   - Run `pnpm docker:up` to start the database and other services.
-   - Run `pnpm db:push` to sync your schema with the database
+   - Open codebase as a container in [VSCode](https://code.visualstudio.com/) or your favorite VSCode fork.
+   - Run the following commands in order
+
+     ```
+     pnpm install
+     pnpm docker:up
+     pnpm db:push
+     pnpm dev
+     ```
+
+   - Run the following commands to clean up after yourself
+
+     ```
+     pnpm docker:down
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
+   - Run the following commands if you are unable to start any of the services
+
+     ```
+     rm -rf node_modules
+     rm pnpm-lock.yaml
+     ```
+
    - Use `pnpm db:studio` to view and manage your data
 
 2. **Better Auth Setup**
@@ -75,21 +147,74 @@ Before running the application, you'll need to set up several services and envir
      BETTER_AUTH_SECRET=your_secret_key
      ```
 
-3. **Google OAuth Setup (Optional)**
+3. **Google OAuth Setup**
 
    - Go to [Google Cloud Console](https://console.cloud.google.com)
    - Create a new project
+   - Add the following APIs to your Google Cloud Project: [People API](https://console.cloud.google.com/apis/library/people.googleapis.com), [Gmail API](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
+     - Use links above and click 'Enable' or
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Google People API' and click 'Enable'
+     - Go to 'APIs and Services' > 'Enable APIs and Services' > Search for 'Gmail API' and click 'Enable'
    - Enable the Google OAuth2 API
    - Create OAuth 2.0 credentials (Web application type)
    - Add authorized redirect URIs:
-     - `http://localhost:3000/api/auth/callback/google` (development)
-     - `https://your-production-url/api/auth/callback/google` (production)
+     - Development:
+       - `http://localhost:3000/api/auth/callback/google`
+       - `http://localhost:3000/api/v1/mail/auth/google/callback`
+     - Production:
+       - `https://your-production-url/api/auth/callback/google`
+       - `https://your-production-url/api/v1/mail/auth/google/callback`
    - Add to `.env`:
 
      ```env
      GOOGLE_CLIENT_ID=your_client_id
      GOOGLE_CLIENT_SECRET=your_client_secret
+     GOOGLE_REDIRECT_URI=http://localhost:3000/api/v1/mail/auth/google/callback
      ```
+
+   - Add yourself as a test user:
+
+     - Goto [`Audience`](https://console.cloud.google.com/auth/audience)
+     - Under 'Test users' click 'Add Users'
+     - Add your email and click 'Save'
+
+> [!WARNING]
+> The `GOOGLE_REDIRECT_URI` must match **exactly** what you configure in the Google Cloud Console, including the protocol (http/https), domain, and path - these are provided above.
+
+4. **Github OAuth Setup**
+
+   - Go to [Github Developer Setting](https://github.com/settings/developers)
+   - Create a new OAuth Apps
+   - Add authorized redirect URIs:
+
+     - Development:
+       - `http://localhost:3000/api/auth/callback/github`
+     - Production:
+       - `https://your-production-url/api/auth/callback/github`
+
+   - Add to `.env`:
+
+     ```env
+     GITHUB_CLIENT_ID=your_client_id
+     GITHUB_CLIENT_SECRET=your_client_secret
+     ```
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure the following variables:
+
+```env
+# Auth
+BETTER_AUTH_SECRET=     # Required: Secret key for authentication
+
+# Google OAuth (Optional)
+GOOGLE_CLIENT_ID=       # Required for Gmail integration
+GOOGLE_CLIENT_SECRET=   # Required for Gmail integration
+GOOGLE_REDIRECT_URI=    # Required for Gmail integration
+
+# Database
+DATABASE_URL=          # Required: PostgreSQL connection string
+```
 
 ### Running Locally
 
@@ -132,9 +257,9 @@ When you're finished with the changes, create a pull request, also known as a PR
 
 Mail0.io is licensed under the MIT License. This means you can:
 
-✅ Use the software commercially  
-✅ Modify the source code  
-✅ Distribute your modifications  
+✅ Use the software commercially
+✅ Modify the source code
+✅ Distribute your modifications
 ✅ Use and modify the software privately
 
 The only requirement is that you include the original copyright and license notice in any copy of the software/source.

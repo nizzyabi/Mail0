@@ -1,106 +1,138 @@
 "use client";
 
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-} from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import * as React from "react";
 import Link from "next/link";
+
+interface NavItemProps {
+  title: string;
+  url: string;
+  icon?: React.ComponentType<any>;
+  badge?: number;
+  isActive?: boolean;
+  isExpanded?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  suffix?: React.ComponentType<any>;
+  subItems?: Array<{
+    title: string;
+    url: string;
+    isActive?: boolean;
+  }>;
+}
 
 interface NavMainProps {
   items: {
     title: string;
-    items: {
-      title: string;
-      url: string;
-      icon?: React.ComponentType<{ className?: string }>;
-      badge?: number;
-      items?: {
-        title: string;
-        url: string;
-        badge?: number;
-      }[];
-    }[];
+    items: NavItemProps[];
   }[];
 }
 
 export function NavMain({ items }: NavMainProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
+  // Create refs for each icon
+  const iconRefs = useRef<{ [key: string]: React.RefObject<any> }>({});
+
+  // Initialize refs for all items
+  useEffect(() => {
+    items.forEach((section) => {
+      section.items.forEach((item) => {
+        if (item.icon && !iconRefs.current[item.title]) {
+          iconRefs.current[item.title] = React.createRef();
+        }
+      });
+    });
+  }, [items]);
+
+  // Checks if the given URL matches the current URL path and required search parameters.
   const isUrlActive = (url: string) => {
-    //remove trailing slashes
-    const cleanPath = pathname?.replace(/\/$/, "") || "";
-    const cleanUrl = url.replace(/\/$/, "");
-    return cleanPath === cleanUrl;
+    const urlObj = new URL(url, window.location.origin);
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanUrl = urlObj.pathname.replace(/\/$/, "");
+
+    if (cleanPath !== cleanUrl) return false;
+
+    for (const [key, value] of new URLSearchParams(urlObj.search)) {
+      if (new URLSearchParams(searchParams).get(key) !== value) return false;
+    }
+
+    return true;
   };
 
   return (
-    <>
-      {items.map((group) => (
-        <SidebarGroup key={group.title}>
-          {group.title && <SidebarGroupLabel>{group.title}</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {group.items.map((item) => (
-                <Collapsible key={item.title}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <Link href={item.url}>
-                        <SidebarMenuButton
-                          isActive={isUrlActive(item.url)}
-                          className={isUrlActive(item.url) ? "bg-accent" : ""}
-                        >
-                          {item.icon && <item.icon className="mr-2 size-4" />}
-                          <span className="flex-1">{item.title}</span>
-                          {item.badge !== undefined && (
-                            <span className="ml-auto mr-2 text-muted-foreground">{item.badge}</span>
-                          )}
-                          {item.items && (
-                            <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                          )}
-                        </SidebarMenuButton>
-                      </Link>
-                    </CollapsibleTrigger>
-                    {item.items && (
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.items.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton asChild>
-                                <Link
-                                  href={subItem.url}
-                                  className={`flex w-full justify-between ${
-                                    isUrlActive(subItem.url) ? "text-primary" : ""
-                                  }`}
-                                >
-                                  <span>{subItem.title}</span>
-                                  {subItem.badge !== undefined && (
-                                    <span className="text-muted-foreground">{subItem.badge}</span>
-                                  )}
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
+    <nav className="space-y-6">
+      {items.map((section, i) => (
+        <div key={i}>
+          {section.title && (
+            <h2 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">
+              {section.title}
+            </h2>
+          )}
+          <div className="space-y-1">
+            {section.items.map((item, j) => (
+              <div key={j} className="px-3">
+                <Link
+                  href={item.url}
+                  onClick={item.onClick}
+                  className={cn(
+                    "flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                    (item.isActive || isUrlActive(item.url)) &&
+                      "bg-accent/90 font-semibold text-accent-foreground",
+                  )}
+                  onMouseEnter={() => {
+                    const iconRef = iconRefs.current[item.title]?.current;
+                    if (iconRef?.startAnimation) {
+                      iconRef.startAnimation();
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    const iconRef = iconRefs.current[item.title]?.current;
+                    if (iconRef?.stopAnimation) {
+                      iconRef.stopAnimation();
+                    }
+                  }}
+                >
+                  <div className="flex items-center">
+                    {item.icon && (
+                      <item.icon ref={iconRefs.current[item.title]} className="mr-3 h-3.5 w-3.5" />
                     )}
-                  </SidebarMenuItem>
-                </Collapsible>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                    <span className="text-[13px]">{item.title}</span>
+                  </div>
+                  <div className="flex items-center">
+                    {item.suffix && (
+                      <item.suffix
+                        className={cn(
+                          "ml-2 h-4 w-4 transform transition-transform duration-200 ease-in-out",
+                          item.isExpanded && "rotate-180",
+                        )}
+                      />
+                    )}
+                  </div>
+                </Link>
+                {item.isExpanded && item.subItems && (
+                  <div className="ml-6 space-y-1 py-1">
+                    {item.subItems.map((subItem, k) => (
+                      <Link
+                        key={k}
+                        href={subItem.url}
+                        className={cn(
+                          "mx-1 flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                          subItem.isActive && "bg-accent font-bold text-accent-foreground",
+                        )}
+                      >
+                        {subItem.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       ))}
-    </>
+    </nav>
   );
 }
