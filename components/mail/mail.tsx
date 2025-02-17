@@ -221,7 +221,7 @@ export function Mail({ folder }: MailProps) {
             </div>
           </ResizablePanel>
 
-          {(isDesktop || isTablet) && mail.selected && (
+          {isDesktop && mail.selected && (
             <>
               <ResizableHandle />
               <ResizablePanel defaultSize={75} minSize={25}>
