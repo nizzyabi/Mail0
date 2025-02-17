@@ -4,7 +4,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Archive, ArchiveX, FileText, Inbox, LucideIcon, Plus, Send, Trash2 } from "lucide-react";
