@@ -125,7 +125,7 @@ export function Mail({ folder }: MailProps) {
           autoSaveId={"mail-panel-layout"}
           className="rounded-inherit overflow-hidden rounded-tl-md"
         >
-          <ResizablePanel defaultSize={isMobile ? 100 : 35} minSize={isMobile ? 100 : 35}>
+          <ResizablePanel defaultSize={isMobile ? 100 : 25} minSize={isMobile ? 100 : 25}>
             <div className="flex-1 overflow-y-auto">
               <div>
                 <div className="sticky top-0 z-10 bg-background pt-[8px]">
