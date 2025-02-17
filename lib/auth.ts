@@ -140,4 +140,5 @@ const options = {
 
 export const auth = betterAuth({
   ...options,
+  trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS ?? [],
 });

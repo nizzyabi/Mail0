@@ -8,6 +8,7 @@ import {
   List,
   ListOrdered,
   FileIcon,
+  Send,
 } from "lucide-react";
 import * as React from "react";
 
@@ -140,7 +141,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
     if (attachments.length === 0) return null;
 
     return (
-      <div className="mx-auto mt-2 flex w-[95%] flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-2">
         {attachments.slice(0, MAX_VISIBLE_ATTACHMENTS).map((file, index) => (
           <Tooltip key={index}>
             <TooltipTrigger asChild>
@@ -160,7 +161,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
               </Badge>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent className="w-64 p-0">
+              <TooltipContent className="w-64 p-0" sideOffset={6}>
                 <div className="relative h-32 w-full">
                   {file.type.startsWith("image/") ? (
                     <Image
@@ -287,10 +288,10 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
     <TooltipProvider>
       <Card className="h-full w-full border-none shadow-none">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">New Message</CardTitle>
+          <CardTitle className="text-2xl font-semibold tracking-tight">New Message</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-2">
+          <div className="grid gap-2.5">
             <div className="relative">
               <Input
                 tabIndex={1}
@@ -300,7 +301,6 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                   setToInput(e.target.value);
                   setShowSuggestions(true);
                 }}
-                className="rounded-none border-0 focus-visible:ring-0"
               />
               {showSuggestions && filteredSuggestions.length > 0 && (
                 <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-40 overflow-auto rounded-md border border-input bg-background shadow-lg">
@@ -319,17 +319,14 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                 </ul>
               )}
             </div>
-            <Separator className="mx-auto w-[95%]" />
             <Input
               placeholder="Subject"
               defaultValue={subject || ""}
               onChange={(e) => setSubject(e.target.value)}
-              className="rounded-none border-0 focus-visible:ring-0"
               tabIndex={2}
             />
 
-            <Separator className="mx-auto w-[95%]" />
-            <div className="flex justify-end p-2">
+            <div className="flex justify-end">
               <ToggleGroup type="multiple">
                 <ToggleGroupItem tabIndex={3} value="bold" onClick={() => insertFormat("bold")}>
                   <Bold className="h-4 w-4" />
@@ -384,7 +381,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
             <div
               ref={editorRef}
               contentEditable
-              className="mx-auto min-h-[300px] w-[95%] resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="min-h-[300px] w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               role="textbox"
               aria-multiline="true"
               tabIndex={9}
@@ -400,12 +397,11 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
             />
 
             {renderAttachments()}
-            <div className="mx-auto mt-4 flex w-[95%] items-center justify-between">
-              <label className="cursor-pointer">
+            <div className="mt-4 flex justify-between">
+              <label>
                 <Button
                   tabIndex={10}
                   variant="outline"
-                  size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     const fileInput = e.currentTarget.nextElementSibling as HTMLInputElement;
@@ -417,7 +413,6 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                 </Button>
                 <Input type="file" className="hidden" multiple onChange={handleAttachment} />
               </label>
-
               <div className="flex gap-2">
                 <Button
                   tabIndex={11}
@@ -437,6 +432,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                   }}
                 >
                   Send
+                  <Send className="ml-2 h-3 w-3" />
                 </Button>
               </div>
             </div>

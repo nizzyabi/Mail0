@@ -1,17 +1,19 @@
 "use client";
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import { SquarePenIcon, SquarePenIconHandle } from "../icons/animated/square-pen";
+import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
 import { SettingsGearIcon } from "../icons/animated/settings-gear";
 import { CheckCheckIcon } from "../icons/animated/check-check";
 import { MessageCircleIcon } from "../icons/animated/message";
 import { SidebarThemeSwitch } from "./sidebar-theme-switch";
 import { BookTextIcon } from "../icons/animated/book-text";
+import React, { useMemo, useRef, useState } from "react";
 import { ArchiveIcon } from "../icons/animated/archive";
 import { UsersIcon } from "../icons/animated/users";
 import { InboxIcon } from "../icons/animated/inbox";
 import { CartIcon } from "../icons/animated/cart";
 import { BellIcon } from "../icons/animated/bell";
-import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { XIcon } from "../icons/animated/x";
 import { $fetch } from "@/lib/auth-client";
@@ -19,6 +21,7 @@ import { BASE_URL } from "@/lib/constants";
 import { ChevronDown } from "lucide-react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { Button } from "./button";
 import useSWR from "swr";
 
 const fetchStats = async () => {
@@ -136,8 +139,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="mt-2 flex items-center justify-between gap-2">
+      <SidebarHeader className="flex items-center justify-between gap-4 p-3">
         <NavUser />
+        <ComposeButton />
       </SidebarHeader>
       <SidebarContent className="justify-between">
         <NavMain items={navItems} />
@@ -147,5 +151,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+function ComposeButton() {
+  const iconRef = useRef<SquarePenIconHandle>(null);
+
+  const { open } = useOpenComposeModal();
+
+  return (
+    <Button
+      onClick={open}
+      className="h-8 w-full justify-start"
+      onMouseEnter={() => {
+        const icon = iconRef.current;
+        if (icon?.startAnimation) {
+          icon.startAnimation();
+        }
+      }}
+      onMouseLeave={() => {
+        const icon = iconRef.current;
+        if (icon?.stopAnimation) {
+          icon.stopAnimation();
+        }
+      }}
+    >
+      <SquarePenIcon ref={iconRef} />
+      Compose
+    </Button>
   );
 }

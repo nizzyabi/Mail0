@@ -88,10 +88,10 @@ export function NavUser() {
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="w-fit">
+            <SidebarMenuButton className="w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
               {isLoading ? (
                 <>
-                  <div className="size-5 animate-pulse rounded-md bg-muted" />
+                  <div className="size-5 animate-pulse rounded-full bg-muted" />
                   <div className="flex min-w-0 flex-col gap-1 leading-none">
                     <div className="h-4 w-24 animate-pulse rounded bg-muted" />
                   </div>
@@ -101,7 +101,7 @@ export function NavUser() {
                   <Image
                     src={activeAccount?.picture || session?.user.image || "/logo.png"}
                     alt={activeAccount?.name || session?.user.name || "User"}
-                    className="shrink-0 rounded-md"
+                    className="shrink-0 rounded-full"
                     width={20}
                     height={20}
                   />
@@ -121,7 +121,7 @@ export function NavUser() {
         className="ml-3 w-[--radix-dropdown-menu-trigger-width] min-w-56 font-medium"
         align="end"
         side={"bottom"}
-        sideOffset={1}
+        sideOffset={8}
       >
         <DropdownMenuItem onClick={() => router.push("/support")}>
           <div className="flex cursor-pointer items-center gap-2 text-[13px]">

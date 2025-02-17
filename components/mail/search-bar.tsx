@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
 import { useForm } from "react-hook-form";
-import { useDebounce } from "react-use";
 import { Form } from "../ui/form";
 import { cn } from "@/lib/utils";
 
@@ -69,13 +68,6 @@ function DateFilter() {
 
 export function SearchBar() {
   const [, setSearchValue] = useSearchValue();
-  const [value, setValue] = useState({
-    subject: "",
-    from: "",
-    to: "",
-    q: "",
-  });
-
   const form = useForm({
     defaultValues: {
       subject: "",
@@ -85,25 +77,16 @@ export function SearchBar() {
     },
   });
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     const subscription = form.watch((data) => {
-      setValue(data as { subject: string; from: string; to: string; q: string });
+      submitSearch(data as { subject: string; from: string; to: string; q: string });
     });
     return () => subscription.unsubscribe();
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [form.watch]);
 
-  // debounce the search, so it doesnt spam with requests
-  useDebounce(
-    () => {
-      submitSearch(value);
-    },
-    250,
-    [value],
-  );
-
   const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
-    // TODO: add logic for other fields
+    // add logic for other fields
     setSearchValue({
       value: data.q,
       highlight: data.q,
@@ -119,13 +102,14 @@ export function SearchBar() {
   };
 
   return (
-    <div className="relative flex-1 px-4 md:max-w-[600px] md:px-8">
+    <div className="relative flex-1 md:max-w-[600px]">
       <Form {...form}>
-        <form className="relative flex items-center" onSubmit={form.handleSubmit(submitSearch)}>
+        <div className="relative flex items-center">
           <Search className="absolute left-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Search"
-            className="h-7 w-full rounded-md pl-8 pr-14 text-muted-foreground"
+            autoFocus
+            className="h-8 w-full rounded-md pl-8 pr-14 text-muted-foreground"
             {...form.register("q")}
           />
           <div className="absolute right-2 flex items-center">
@@ -142,6 +126,7 @@ export function SearchBar() {
                 className="w-[min(calc(100vw-2rem),400px)] p-3 sm:w-[500px] md:w-[600px] md:p-4"
                 side="bottom"
                 sideOffset={10}
+                alignOffset={-8}
                 align="end"
               >
                 <div className="space-y-4">
@@ -250,7 +235,7 @@ export function SearchBar() {
               </PopoverContent>
             </Popover>
           </div>
-        </form>
+        </div>
       </Form>
     </div>
   );

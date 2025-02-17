@@ -1,6 +1,17 @@
 "use client";
 
 import {
+  Github,
+  Star,
+  GitFork,
+  MessageCircle,
+  GitGraph,
+  ChartAreaIcon,
+  GitPullRequest,
+  LayoutGrid,
+  FileCode,
+} from "lucide-react";
+import {
   Area,
   AreaChart,
   Bar,
@@ -12,16 +23,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  Github,
-  Star,
-  GitFork,
-  MessageCircle,
-  FileCode,
-  ChartAreaIcon,
-  GitPullRequest,
-  LayoutGrid,
-} from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -454,27 +455,22 @@ export default function OpenPage() {
                           </AvatarFallback>
                         </Avatar>
 
-                        <div className="mt-2 flex flex-col items-center gap-1.5">
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs font-medium text-neutral-900 dark:text-neutral-200">
-                              {contributor.contributions}
-                            </span>
-                            <FileCode className="h-3 w-3 text-muted-foreground" />
-                          </div>
+                        <div className="mt-2 text-center">
+                          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                            {contributor.login}
+                          </span>
+                          {specialRoles[contributor.login.toLowerCase()] && (
+                            <div className="text-[10px] text-muted-foreground">
+                              {specialRoles[contributor.login.toLowerCase()]}
+                            </div>
+                          )}
                         </div>
 
-                        <div className="mt-1 text-center">
-                          <span className="text-[10px] text-muted-foreground">
-                            {contributor.login}
-                            {specialRoles[contributor.login.toLowerCase()] && (
-                              <>
-                                <span className="mx-1 inline-block h-1 w-1 shrink-0 rounded-full bg-muted-foreground/30" />
-                                <span className="text-muted-foreground">
-                                  {specialRoles[contributor.login.toLowerCase()]}
-                                </span>
-                              </>
-                            )}
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                            {contributor.contributions}
                           </span>
+                          <GitGraph className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
                       </Link>
                     ))}
@@ -544,7 +540,7 @@ export default function OpenPage() {
                                       {data.login}
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <FileCode className="h-3 w-3" />
+                                      <GitGraph className="h-3 w-3" />
                                       <span>{data.contributions} commits</span>
                                     </div>
                                   </div>

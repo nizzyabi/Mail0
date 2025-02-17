@@ -123,9 +123,6 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
     };
   }, []);
 
-  // TODO: Get the number of messages in the thread from the API
-  const messagesCount: number = 1;
-
   return (
     <div
       onClick={handleMailClick}
@@ -133,20 +130,20 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
       onMouseLeave={handleMouseLeave}
       key={message.id}
       className={cn(
-        "group flex cursor-pointer flex-col items-start p-3.5 text-left text-sm transition-all hover:bg-accent",
+        "group relative flex cursor-pointer flex-col items-start overflow-clip rounded-lg border border-transparent px-4 py-3 text-left text-sm transition-all hover:border-border hover:bg-accent hover:opacity-100",
         !message.unread && "opacity-70",
-        isMailSelected ? "border-border bg-accent" : "",
-        isMailBulkSelected && "bg-muted shadow-[inset_5px_0_0_-1px_hsl(var(--primary))]",
+        (isMailSelected || isMailBulkSelected) && "border-border bg-accent opacity-100",
         isCompact && "py-2",
       )}
     >
+      <div
+        className={cn(
+          "absolute inset-y-0 left-0 w-1 -translate-x-2 bg-primary transition-transform ease-out",
+          isMailBulkSelected && "translate-x-0",
+        )}
+      />
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
-          {message.totalReplies > 1 && (
-            <p className="rounded-full border border-dashed border-muted-foreground px-1.5 py-0.5 text-xs font-bold">
-              {message.totalReplies}
-            </p>
-          )}
           <p
             className={cn(
               message.unread ? "font-bold" : "font-medium",
@@ -154,15 +151,15 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
             )}
           >
             {highlightText(message.sender.name, searchValue.highlight)}{" "}
-            {messagesCount !== 1 ? (
-              <span className="ml-0.5 text-xs opacity-70">{messagesCount}</span>
+            {message.totalReplies !== 1 ? (
+              <span className="ml-0.5 text-xs opacity-70">{message.totalReplies}</span>
             ) : null}
             {message.unread ? <span className="ml-0.5 size-2 rounded-full bg-[#006FFE]" /> : null}
           </p>
         </div>
         <p
           className={cn(
-            "pr-2 text-xs font-normal opacity-70 transition-opacity group-hover:opacity-100",
+            "text-xs font-normal opacity-70 transition-opacity group-hover:opacity-100",
             isMailSelected && "opacity-100",
           )}
         >
@@ -171,7 +168,7 @@ const Thread = ({ message: initialMessage, selectMode, onSelect, isCompact }: Th
       </div>
       <p
         className={cn(
-          "mt-1 text-xs opacity-70 transition-opacity",
+          "mt-1 line-clamp-2 text-xs opacity-70 transition-opacity",
           isCompact && "line-clamp-1",
           isMailSelected && "opacity-100",
         )}
@@ -245,7 +242,7 @@ export function MailList({ items, isCompact, folder }: MailListProps) {
     <ScrollArea className="h-full" type="scroll">
       <div
         className={cn(
-          "flex flex-col",
+          "flex flex-col gap-1.5",
           // Prevents accidental text selection while in range select mode.
           selectMode === "range" && "select-none",
         )}
@@ -274,6 +271,7 @@ function MailLabels({ labels }: { labels: string[] }) {
   if (!visibleLabels.length) return null;
 
   return (
+    // TODO: When clicking on a label, apply filter to show only messages with that label.
     <div className={cn("mt-1.5 flex select-none items-center gap-2")}>
       {visibleLabels.map((label) => (
         <Badge key={label} className="rounded-full" variant={getDefaultBadgeStyle(label)}>

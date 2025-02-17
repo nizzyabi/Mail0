@@ -28,16 +28,9 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, index }: Props) => {
   }, [index]);
 
   return (
-    <div
-      className={cn(
-        "relative m-4 flex-1 overflow-hidden rounded-lg border border-border bg-secondary/50 p-4",
-        isFullscreen && "h-[calc(100vh-4rem)]",
-      )}
-    >
-      <div className="relative inset-0 h-full overflow-y-auto pb-0">
-        <div
-          className={cn("flex flex-col gap-4 transition-all duration-200", !isCollapsed && "pb-4")}
-        >
+    <div className={cn("relative flex-1 overflow-hidden", isFullscreen && "h-[calc(100vh-4rem)]")}>
+      <div className="relative h-full overflow-y-auto">
+        <div className="flex flex-col gap-4 p-4 py-5 transition-all duration-200">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <Avatar>
@@ -106,12 +99,7 @@ const MailDisplay = ({ emailData, isFullscreen, isMuted, index }: Props) => {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-6 px-2"
-              >
+              <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)}>
                 {isCollapsed ? (
                   <ChevronDown className="h-4 w-4" />
                 ) : (

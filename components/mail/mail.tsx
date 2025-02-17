@@ -12,19 +12,17 @@ import {
   BellOff,
   Check,
   ListFilter,
-  SquarePen,
+  SearchIcon,
   X,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useState, useCallback, useMemo, useEffect, ReactNode } from "react";
-import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
 import { ThreadDisplay } from "@/components/mail/thread-display";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useSearchValue } from "@/hooks/use-search-value";
 import { MailList } from "@/components/mail/mail-list";
-import { Separator } from "@/components/ui/separator";
 import { useMail } from "@/components/mail/use-mail";
 import { SidebarToggle } from "../ui/sidebar-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -117,55 +115,49 @@ export function Mail({ folder }: MailProps) {
     setMail((mail) => ({ ...mail, selected: null }));
   }, [setMail]);
 
+  const [searchMode, setSearchMode] = useState(false);
+
   return (
     <TooltipProvider delayDuration={0}>
       <div className="rounded-inherit flex">
         <ResizablePanelGroup
           direction="horizontal"
-          autoSaveId={"mail-panel-layout"}
-          className="rounded-inherit overflow-hidden rounded-tl-md"
+          autoSaveId="mail-panel-layout"
+          className="rounded-inherit gap-1.5 overflow-hidden rounded-tl-md"
         >
-          <ResizablePanel defaultSize={isMobile ? 100 : 25} minSize={isMobile ? 100 : 25}>
-            <div className="flex-1 overflow-y-auto">
-              <div>
-                <div className="sticky top-0 z-10 bg-background pt-[8px]">
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-1">
-                      <SidebarToggle className="h-fit px-2" />
-                      <ComposeButton />
-                    </div>
-                    {mail.bulkSelected.length === 0 ? (
+          <ResizablePanel
+            className="border-none !bg-transparent"
+            defaultSize={isMobile ? 100 : 25}
+            minSize={isMobile ? 100 : 25}
+          >
+            <div className="flex-1 flex-col overflow-y-auto border bg-card shadow-sm md:flex md:rounded-2xl md:shadow-sm">
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-1.5 p-2">
+                <SidebarToggle className="h-fit px-2" />
+                <Button
+                  variant="ghost"
+                  className="md:h-fit md:px-2"
+                  onClick={() => setIsCompact(!isCompact)}
+                >
+                  <AlignVerticalSpaceAround />
+                </Button>
+                {searchMode && (
+                  <div className="flex flex-1 items-center justify-center gap-1.5">
+                    <SearchBar />
+                    <Button
+                      variant="ghost"
+                      className="md:h-fit md:px-2"
+                      onClick={() => setSearchMode(false)}
+                    >
+                      <X />
+                    </Button>
+                  </div>
+                )}
+                {!searchMode && (
+                  <>
+                    {mail.bulkSelected.length > 0 ? (
                       <>
-                        <SearchBar />
-                        <div className="flex items-center space-x-1.5">
-                          <Button
-                            variant="ghost"
-                            className="md:h-fit md:px-2"
-                            onClick={() => setIsCompact(!isCompact)}
-                          >
-                            <AlignVerticalSpaceAround />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="md:h-fit md:px-2">
-                                <ListFilter className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setFilterValue("all")}>
-                                All mail {filterValue === "all" && <Check />}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setFilterValue("unread")}>
-                                Unread {filterValue === "unread" && <Check />}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center">
-                          <span className="text-sm tabular-nums text-muted-foreground">
+                        <div className="flex flex-1 items-center justify-center">
+                          <span className="text-sm font-medium tabular-nums">
                             {mail.bulkSelected.length} selected
                           </span>
                           <Tooltip>
@@ -173,7 +165,7 @@ export function Mail({ folder }: MailProps) {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="ml-1 h-8 w-fit px-2 text-muted-foreground"
+                                className="ml-1.5 h-8 w-fit px-2 text-muted-foreground"
                                 onClick={() => setMail({ ...mail, bulkSelected: [] })}
                               >
                                 <X />
@@ -184,48 +176,81 @@ export function Mail({ folder }: MailProps) {
                         </div>
                         <BulkSelectActions />
                       </>
-                    )}
-                  </div>
-                  <Separator className="mt-2" />
-                </div>
-
-                <div className="h-[calc(100svh-(8px+8px+6px+44px-2px))] overflow-scroll rounded-b-sm bg-background">
-                  {isLoading || isTransitioning ? (
-                    <div className="flex flex-col">
-                      {[...Array(8)].map((_, i) => (
-                        <div key={i} className="flex flex-col border-b px-4 py-4">
-                          <div className="flex w-full items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Skeleton className="h-4 w-24" />
-                            </div>
-                            <Skeleton className="h-3 w-12" />
-                          </div>
-                          <Skeleton className="mt-2 h-3 w-32" />
-                          <Skeleton className="mt-2 h-3 w-full" />
-                          <div className="mt-2 flex gap-2">
-                            <Skeleton className="h-5 w-16 rounded-md" />
-                            <Skeleton className="h-5 w-16 rounded-md" />
-                          </div>
+                    ) : (
+                      <>
+                        <h1 className="flex-1 text-center text-sm font-medium">Inbox</h1>
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            variant="ghost"
+                            className="md:h-fit md:px-2"
+                            onClick={() => setSearchMode(true)}
+                          >
+                            <SearchIcon />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <MailList
-                      items={threadsResponse?.threads || []}
-                      isCompact={isCompact}
-                      folder={folder}
-                    />
-                  )}
-                </div>
+                      </>
+                    )}
+                  </>
+                )}
+                {mail.bulkSelected.length === 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="md:h-fit md:px-2">
+                        <ListFilter className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setFilterValue("all")}>
+                        All mail {filterValue === "all" && <Check />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setFilterValue("unread")}>
+                        Unread {filterValue === "unread" && <Check />}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+
+              <div className="h-[calc(100svh-(8px+8px+14px+44px-2px))] overflow-scroll p-2 pt-0">
+                {isLoading || isTransitioning ? (
+                  <div className="flex flex-col">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="flex flex-col px-4 py-3">
+                        <div className="flex w-full items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-24" />
+                          </div>
+                          <Skeleton className="h-3 w-12" />
+                        </div>
+                        <Skeleton className="mt-2 h-3 w-32" />
+                        <Skeleton className="mt-2 h-3 w-full" />
+                        <div className="mt-2 flex gap-2">
+                          <Skeleton className="h-4 w-16 rounded-full" />
+                          <Skeleton className="h-4 w-16 rounded-full" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <MailList
+                    items={threadsResponse?.threads || []}
+                    isCompact={isCompact}
+                    folder={folder}
+                  />
+                )}
               </div>
             </div>
           </ResizablePanel>
 
           {isDesktop && mail.selected && (
             <>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={75} minSize={25}>
-                <div className="hidden h-[calc(100vh-(8px+8px))] flex-1 md:block">
+              <ResizableHandle className="opacity-0" />
+              <ResizablePanel
+                className="shadow-sm md:flex md:rounded-2xl md:border md:shadow-sm"
+                defaultSize={75}
+                minSize={25}
+              >
+                <div className="hidden h-[calc(100vh-(12px+14px))] flex-1 md:block">
                   <ThreadDisplay mail={mail.selected} onClose={handleClose} />
                 </div>
               </ResizablePanel>
@@ -234,9 +259,9 @@ export function Mail({ folder }: MailProps) {
         </ResizablePanelGroup>
 
         {/* Mobile Drawer */}
-        {!isDesktop && (
+        {isMobile && (
           <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerContent className="h-[calc(100vh-3rem)] p-0">
+            <DrawerContent className="h-[calc(100vh-3rem)] bg-card p-0">
               <DrawerHeader className="sr-only">
                 <DrawerTitle>Email Details</DrawerTitle>
               </DrawerHeader>
@@ -248,15 +273,6 @@ export function Mail({ folder }: MailProps) {
         )}
       </div>
     </TooltipProvider>
-  );
-}
-
-function ComposeButton() {
-  const { open } = useOpenComposeModal();
-  return (
-    <Button onClick={open} variant="ghost" className="h-fit px-2">
-      <SquarePen />
-    </Button>
   );
 }
 

@@ -13,6 +13,10 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     BETTER_AUTH_SECRET: z.string().min(1),
     BETTER_AUTH_URL: z.string().min(1).url(),
+    BETTER_AUTH_TRUSTED_ORIGINS: z
+      .string()
+      .transform((s) => s.split(",").map((origin) => origin.trim()))
+      .pipe(z.array(z.string().url())),
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     GOOGLE_REDIRECT_URI: z.string().min(1).url(),
