@@ -9,6 +9,7 @@ import {
 import { Archive, ArchiveX, FileText, Inbox, LucideIcon, Plus, Send, Trash2 } from "lucide-react";
 import { emailProviders } from "@/constants/emailProviders";
 import { useConnections } from "@/hooks/use-connections";
+import { MailThreadSkeleton } from "./mail-skeleton";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
@@ -91,10 +92,13 @@ function EmptyState({ folder, className }: EmptyStateProps) {
   const config = FOLDER_CONFIGS[folder] ?? FOLDER_CONFIGS.inbox;
   const Icon = config.icon;
   const connections = useConnections();
-  const noConnection = useMemo(
-    () => !connections?.data || connections?.data?.length === 0,
-    [connections?.data],
-  );
+  const noConnection = !connections?.data || connections?.data?.length === 0;
+
+  console.log(connections, "from empty state");
+  console.log(noConnection, "from empty state");
+  if (connections.isLoading) {
+    return <MailThreadSkeleton />;
+  }
 
   return (
     <div>

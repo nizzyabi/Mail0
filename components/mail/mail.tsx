@@ -25,6 +25,7 @@ import { useSearchValue } from "@/hooks/use-search-value";
 import { MailList } from "@/components/mail/mail-list";
 import { useMail } from "@/components/mail/use-mail";
 import { SidebarToggle } from "../ui/sidebar-toggle";
+import { MailThreadSkeleton } from "./mail-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Mail } from "@/components/mail/data";
 import { useSearchParams } from "next/navigation";
@@ -213,24 +214,7 @@ export function Mail({ folder }: MailProps) {
 
               <div className="h-[calc(100svh-(8px+8px+14px+44px-2px))] overflow-scroll p-2 pt-0">
                 {isLoading || isTransitioning ? (
-                  <div className="flex flex-col">
-                    {[...Array(8)].map((_, i) => (
-                      <div key={i} className="flex flex-col px-4 py-3">
-                        <div className="flex w-full items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-24" />
-                          </div>
-                          <Skeleton className="h-3 w-12" />
-                        </div>
-                        <Skeleton className="mt-2 h-3 w-32" />
-                        <Skeleton className="mt-2 h-3 w-full" />
-                        <div className="mt-2 flex gap-2">
-                          <Skeleton className="h-4 w-16 rounded-full" />
-                          <Skeleton className="h-4 w-16 rounded-full" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <MailThreadSkeleton />
                 ) : (
                   <MailList
                     items={threadsResponse?.threads || []}
