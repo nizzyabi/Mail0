@@ -78,6 +78,10 @@ export function Mail({ folder }: MailProps) {
 
   const [isTransitioning, setIsTransitioning] = useState(true);
 
+  const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   // Check if we're on mobile on mount and when window resizes
   useEffect(() => {
     const checkIsMobile = () => {
@@ -178,7 +182,9 @@ export function Mail({ folder }: MailProps) {
                       </>
                     ) : (
                       <>
-                        <h1 className="flex-1 text-center text-sm font-medium">Inbox</h1>
+                        <h1 className="flex-1 text-center text-sm font-medium">
+                          {capitalizeFirstLetter(folder)}
+                        </h1>
                         <div className="flex items-center gap-1.5">
                           <Button
                             variant="ghost"
