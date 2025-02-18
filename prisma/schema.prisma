@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String       @id @default(uuid())
+  name                String
+  email               String       @unique
+  emailVerified       Boolean      @map("email_verified")
+  image               String?
+  createdAt           DateTime     @map("created_at")
+  updatedAt           DateTime     @map("updated_at")
+  defaultConnectionId String?      @map("default_connection_id")
+  sessions            Session[]
+  accounts            Account[]
+  connections         Connection[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  expiresAt DateTime  @map("expires_at")
+  token     String    @unique
+  createdAt DateTime  @map("created_at")
+  updatedAt DateTime  @map("updated_at")
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId            String    @map("account_id")
+  providerId           String    @map("provider_id")
+  userId               String    @map("user_id")
+  accessToken          String?   @map("access_token")
+  refreshToken         String?   @map("refresh_token")
+  idToken              String?   @map("id_token")
+  accessTokenExpiresAt DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                String?
+  password             String?
+  createdAt            DateTime  @map("created_at")
+  updatedAt            DateTime  @map("updated_at")
+  user                 User      @relation(fields: [userId], references: [id])
+
+  @@map("account")
+}
+
+model Verification {
+  id          String    @id @default(uuid())
+  identifier  String
+  value       String
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime? @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  @@map("verification")
+}
+
+model EarlyAccess {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  @@map("early_access")
+}
+
+model Connection {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  email        String   @unique
+  name         String?
+  picture      String?
+  accessToken  String   @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  scope        String
+  providerId   String   @map("provider_id")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @map("created_at")
+  updatedAt    DateTime @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("connection")
+}
