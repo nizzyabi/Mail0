@@ -3,6 +3,7 @@ import { SettingsGearIcon } from "@/components/icons/animated/settings-gear";
 import { CheckCheckIcon } from "@/components/icons/animated/check-check";
 import { MessageCircleIcon } from "@/components/icons/animated/message";
 import { BookTextIcon } from "@/components/icons/animated/book-text";
+import { SparklesIcon } from "@/components/icons/animated/sparkles";
 import { ArchiveIcon } from "@/components/icons/animated/archive";
 import { UsersIcon } from "@/components/icons/animated/users";
 import { InboxIcon } from "@/components/icons/animated/inbox";
@@ -97,6 +98,11 @@ export const navigationConfig: Record<string, NavConfig> = {
       {
         title: "Advanced",
         items: [
+          {
+            title: "AI Assistant",
+            url: "/mail/ai",
+            icon: SparklesIcon,
+          },
           {
             title: "Settings",
             url: "/settings",
