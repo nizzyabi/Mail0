@@ -16,13 +16,13 @@ export function SettingsCard({
   className,
 }: SettingsCardProps) {
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
+    <Card className={cn("w-full overflow-hidden rounded-2xl border-0 px-3 pt-0", className)}>
+      <CardHeader className="px-0">
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <CardContent className="space-y-6">{children}</CardContent>
-      {footer && <div className="border-t px-6 py-4">{footer}</div>}
+      <CardContent className="space-y-6 overflow-y-auto px-0">{children}</CardContent>
+      {footer && <div className="py-4">{footer}</div>}
     </Card>
   );
 }

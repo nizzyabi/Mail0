@@ -2,6 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useEffect, useMemo } from "react";
+import { isActive } from "@/lib/is-active";
 import * as React from "react";
 import Link from "next/link";
 
@@ -14,7 +15,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-} from "./sidebar";
+} from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,7 @@ interface NavItemProps {
   suffix?: React.ComponentType<IconProps>;
 }
 
-interface NavMainProps {
+interface SidebarContentProps {
   items: {
     title: string;
     items: NavItemProps[];
@@ -48,7 +49,7 @@ type IconRefType = SVGSVGElement & {
   stopAnimation?: () => void;
 };
 
-export function NavMain({ items }: NavMainProps) {
+export function SidebarContent({ items }: SidebarContentProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -64,26 +65,6 @@ export function NavMain({ items }: NavMainProps) {
       });
     });
   }, [items]);
-
-  // Checks if the given URL matches the current URL path and required search parameters.
-  const isUrlActive = useMemo(() => {
-    return (url: string) => {
-      const urlObj = new URL(url, typeof window === "undefined" ? "/" : window.location.origin);
-      const cleanPath = pathname.replace(/\/$/, "");
-      const cleanUrl = urlObj.pathname.replace(/\/$/, "");
-
-      if (cleanPath !== cleanUrl) return false;
-
-      const urlParams = new URLSearchParams(urlObj.search);
-      const currentParams = new URLSearchParams(searchParams);
-
-      for (const [key, value] of urlParams) {
-        if (currentParams.get(key) !== value) return false;
-      }
-
-      return true;
-    };
-  }, [pathname, searchParams]);
 
   return (
     <SidebarGroup className="space-y-2.5 py-0">
@@ -124,7 +105,7 @@ export function NavMain({ items }: NavMainProps) {
                           tooltip={item.title}
                           className={cn(
                             "flex items-center",
-                            (item.isActive || isUrlActive(item.url)) &&
+                            (item.isActive || isActive(item.url, pathname, searchParams)) &&
                               "bg-accent text-accent-foreground",
                           )}
                         >
