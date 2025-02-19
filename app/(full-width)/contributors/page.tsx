@@ -53,10 +53,11 @@ interface ActivityData {
   pullRequests: number;
 }
 
+const excludedUsernames = ["bot1", "dependabot", "github-actions"];
+const coreTeamMembers = ["nizzyabi", "ahmetskilinc", "ripgrim", "user12224", "praashh", "mrgsub"];
+
 const specialRoles: Record<string, string> = {
-  nizzyabi: "Project Owner",
-  praashh: "Maintainer",
-  mrgsub: "Maintainer",
+  nizzyabi: "Project Owner/Founder",
 };
 
 const ChartControls = ({
@@ -403,6 +404,56 @@ export default function OpenPage() {
           </div>
         </div>
 
+        {/* Core Team Section */}
+        <div className="mb-12 space-y-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold tracking-tight text-neutral-900/80 dark:text-white">
+              Core Team
+            </h1>
+            <p className="mt-2 text-muted-foreground">Meet the awesome people behind Mail0</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {contributors
+              .filter(
+                (contributor) =>
+                  !excludedUsernames.includes(contributor.login) &&
+                  coreTeamMembers.some(
+                    (member) => member.toLowerCase() === contributor.login.toLowerCase(),
+                  ),
+              )
+              .sort((a, b) => b.contributions - a.contributions)
+              .map((member) => (
+                <Link
+                  key={member.login}
+                  href={member.html_url}
+                  target="_blank"
+                  className="group relative flex items-center gap-4 rounded-xl border bg-white p-4 transition-all hover:-translate-y-1 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/50"
+                >
+                  <Avatar className="h-16 w-16 rounded-full ring-2 ring-background/50 transition-transform group-hover:scale-105">
+                    <AvatarImage
+                      src={`https://github.com/${member.login}.png`}
+                      alt={member.login}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-xs">
+                      {member.login.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div>
+                    <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-200">
+                      {member.login}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {specialRoles[member.login.toLowerCase()] || "Maintainer"}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+          </div>
+        </div>
+
         {/* Contributors Section */}
         <div className="space-y-6">
           <div className="text-center">
@@ -411,10 +462,7 @@ export default function OpenPage() {
             </h1>
             <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
               <FileCode className="h-4 w-4" />
-              <span>
-                {contributors.reduce((acc, curr) => acc + curr.contributions, 0)} total
-                contributions
-              </span>
+              <span>{contributors.length - coreTeamMembers.length} total contributors</span>
             </div>
           </div>
 
@@ -436,6 +484,13 @@ export default function OpenPage() {
               <TabsContent value="grid">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                   {contributors
+                    .filter(
+                      (contributor) =>
+                        !excludedUsernames.includes(contributor.login) &&
+                        !coreTeamMembers.some(
+                          (member) => member.toLowerCase() === contributor.login.toLowerCase(),
+                        ),
+                    )
                     .sort((a, b) => b.contributions - a.contributions)
                     .map((contributor) => (
                       <Link
@@ -459,11 +514,6 @@ export default function OpenPage() {
                           <span className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
                             {contributor.login}
                           </span>
-                          {specialRoles[contributor.login.toLowerCase()] && (
-                            <div className="text-[10px] text-muted-foreground">
-                              {specialRoles[contributor.login.toLowerCase()]}
-                            </div>
-                          )}
                         </div>
 
                         <div className="mt-1.5 flex items-center gap-1.5">
@@ -482,12 +532,19 @@ export default function OpenPage() {
                   <ChartControls
                     showAll={showAllContributors}
                     setShowAll={setShowAllContributors}
-                    total={contributors.length}
+                    total={contributors.length - coreTeamMembers.length}
                   />
 
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart
                       data={contributors
+                        .filter(
+                          (contributor) =>
+                            !excludedUsernames.includes(contributor.login) &&
+                            !coreTeamMembers.some(
+                              (member) => member.toLowerCase() === contributor.login.toLowerCase(),
+                            ),
+                        )
                         .sort((a, b) => b.contributions - a.contributions)
                         .slice(0, showAllContributors ? undefined : 10)}
                       margin={{ top: 10, right: 10, bottom: 20, left: 10 }}
