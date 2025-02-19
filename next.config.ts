@@ -8,10 +8,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
   },
-  // Optional: If you still have issues, you can use this instead of domains
-  // images: {
-  //   unoptimized: true,
-  // },
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -18,7 +18,7 @@ export default function MailComposeModal() {
 
   return (
     <Credenza open={isOpen} onOpenChange={setIsOpen}>
-      <CredenzaContent>
+      <CredenzaContent className="md:min-w-[500px]">
         <VisuallyHidden>
           <CredenzaHeader>
             <CredenzaTitle>Compose</CredenzaTitle>

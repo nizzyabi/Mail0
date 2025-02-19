@@ -11,7 +11,7 @@ export default function SecurityPage() {
         title="Security"
         description="Manage your security preferences and account protection."
         footer={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <Button variant="outline">
               <KeyRoundIcon className="mr-2 h-4 w-4" />
               Change Password

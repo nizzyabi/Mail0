@@ -119,7 +119,7 @@ export default function ConnectEmails() {
                             Are you sure you want to disconnect this email?
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="flex justify-end gap-3">
+                        <div className="flex justify-end gap-4">
                           <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                           </DialogClose>

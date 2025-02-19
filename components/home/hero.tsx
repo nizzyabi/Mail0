@@ -76,7 +76,7 @@ export default function Hero() {
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-in pt-20 md:px-0 md:pt-20">
       <Balancer className="px-1 text-center text-5xl font-medium sm:text-7xl md:px-0">
-        Your open source email alternative
+        Your open source email
       </Balancer>
       <Balancer className="mx-auto mt-3 max-w-2xl text-center text-lg text-muted-foreground">
         Connect and take control of your email with an open source, secure, and customizable
@@ -96,7 +96,7 @@ export default function Hero() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex items-center justify-center gap-3"
+                className="flex items-center justify-center gap-4"
               >
                 <FormField
                   control={form.control}

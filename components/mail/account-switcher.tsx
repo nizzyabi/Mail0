@@ -46,7 +46,7 @@ export function AccountSwitcher({ isCollapsed, accounts }: AccountSwitcherProps)
       <SelectContent>
         {accounts.map((account) => (
           <SelectItem key={account.email} value={account.email}>
-            <div className="flex items-center gap-3 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:text-primary">
+            <div className="flex items-center gap-4 [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:text-primary">
               {account.icon}
               {account.email}
             </div>

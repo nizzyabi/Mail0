@@ -1,6 +1,31 @@
-# Mail0.io 🚀
+# Mail0.io 🚀 <!-- omit from toc -->
 
 An Open-Source Gmail Alternative for the Future of Email
+
+## Table of Content <!-- omit from toc -->
+
+- [What is Mail0.io?](#what-is-mail0io)
+- [Why Mail0.io?](#why-mail0io)
+- [Our Mission](#our-mission)
+- [Documentation](#documentation)
+- [Roadmap 🛤️](#roadmap-️)
+  - [1. Core Email Connectivity](#1-core-email-connectivity)
+  - [2. Email Usage Improvements](#2-email-usage-improvements)
+  - [3. Infrastructure](#3-infrastructure)
+- [Development Priorities](#development-priorities)
+- [Join the Movement 🚀](#join-the-movement-)
+  - [Stay Tuned](#stay-tuned)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Environment Variables](#environment-variables)
+  - [Running Locally](#running-locally)
+- [Contribute](#contribute)
+- [Issues](#issues)
+  - [Create a new issue](#create-a-new-issue)
+  - [Solve an issue](#solve-an-issue)
+- [Pull Request](#pull-request)
+- [License](#license)
 
 ## What is Mail0.io?
 
@@ -56,7 +81,7 @@ This document outlines the development roadmap for Mail0.io. Our vision is to cr
 - Optimized email client
 - Self-hosting capabilities
 
-### Development Priorities
+## Development Priorities
 
 1. Building a robust foundation for email management
 2. Implementing user-requested features
@@ -79,7 +104,7 @@ Mail0.io is not just another email app—it's a **vision** for a better, more op
 💡 **Contribute** – Share your ideas, suggest features, and help shape the project.
 🤝 **Community-driven** – Our goal is to create an email solution **for the people, by the people**.
 
-### Stay Tuned!
+### Stay Tuned
 
 We're just getting started. If you're excited about a future where **email belongs to users, not corporations**, let's make it happen together.
 
@@ -91,7 +116,7 @@ We're just getting started. If you're excited about a future where **email belon
 
 Mail0.io is built with modern and reliable technologies:
 
-- **Frontend**: Next.js, React, TypeScript, TailwindCSS, ShadCN
+- **Frontend**: Next.js, React, TypeScript, TailwindCSS, Shadcn UI
 - **Backend**: Node.js, Drizzle ORM
 - **Database**: PostgreSQL
 - **Authentication**: Better Auth, Google OAuth

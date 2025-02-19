@@ -35,7 +35,7 @@ export default function Login() {
             Login to your account to continue{" "}
           </CardDescription>
         </CardHeader>
-        <CardContent className="my-4 flex w-full flex-col gap-3">
+        <CardContent className="my-4 flex w-full flex-col gap-4">
           <Button
             onClick={async () => {
               toast.promise(

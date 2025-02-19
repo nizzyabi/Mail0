@@ -6,13 +6,17 @@ import { SidebarThemeSwitch } from "@/components/theme/sidebar-theme-switcher";
 import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
 import { navigationConfig } from "@/config/navigation";
 import { motion, AnimatePresence } from "motion/react";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import React, { useMemo, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { $fetch } from "@/lib/auth-client";
 import { BASE_URL } from "@/lib/constants";
+import { useTheme } from "next-themes";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { Button } from "./button";
+import Image from "next/image";
 import useSWR from "swr";
 
 const fetchStats = async () => {
@@ -22,7 +26,7 @@ const fetchStats = async () => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: stats } = useSWR<number[]>("/api/v1/mail/count", fetchStats);
   const pathname = usePathname();
-
+  const { theme } = useTheme();
   const { currentSection, navItems } = useMemo(() => {
     // Find which section we're in based on the pathname
     const section = Object.entries(navigationConfig).find(([_, config]) =>
@@ -47,53 +51,62 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const showComposeButton = currentSection === "mail";
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="flex flex-col gap-2 p-2">
-        <NavUser />
-        <AnimatePresence mode="wait">
-          {showComposeButton && (
+    <Sidebar collapsible="icon" {...props} className="flex flex-col items-center pl-1">
+      <div className="flex w-full flex-col">
+        <SidebarHeader className="flex flex-col gap-2 p-2">
+          <Image
+            src={theme === "dark" ? "/white-icon.svg" : "/black-icon.svg"}
+            className="mt-3"
+            alt="Logo"
+            width={28}
+            height={28}
+          />
+          <NavUser />
+          <AnimatePresence mode="wait">
+            {showComposeButton && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ComposeButton />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </SidebarHeader>
+        <SidebarContent className="py-0 pt-0">
+          <AnimatePresence mode="wait">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              key={currentSection}
+              initial={{ opacity: 0, x: currentSection === "mail" ? -20 : 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              exit={{ opacity: 0, x: currentSection === "mail" ? 20 : -20 }}
               transition={{ duration: 0.2 }}
+              className="flex-1 py-0"
             >
-              <ComposeButton />
+              <NavMain items={navItems} />
             </motion.div>
-          )}
-        </AnimatePresence>
-      </SidebarHeader>
-      <SidebarContent className="justify-between">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSection}
-            initial={{ opacity: 0, x: currentSection === "mail" ? -20 : 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: currentSection === "mail" ? 20 : -20 }}
-            transition={{ duration: 0.2 }}
-            className="flex-1"
-          >
-            <NavMain items={navItems} />
-          </motion.div>
-        </AnimatePresence>
-        <div className="p-3">
-          <SidebarThemeSwitch />
-        </div>
-      </SidebarContent>
-      <SidebarRail />
+          </AnimatePresence>
+        </SidebarContent>
+      </div>
+      <div className="mb-2 mt-auto pl-1.5">
+        <SidebarThemeSwitch />
+      </div>
     </Sidebar>
   );
 }
 
 function ComposeButton() {
   const iconRef = useRef<SquarePenIconHandle>(null);
-
   const { open } = useOpenComposeModal();
+  const { state } = useSidebar();
+  const isMobile = useIsMobile();
 
   return (
     <Button
       onClick={open}
-      className="mx-1 h-8 w-[calc(100%-8px)] justify-start px-2"
+      className="mt-1 h-8 w-[calc(100%)] border bg-secondary text-primary shadow shadow-black/5 hover:bg-secondary/90"
       onMouseEnter={() => {
         const icon = iconRef.current;
         if (icon?.startAnimation) {
@@ -107,8 +120,13 @@ function ComposeButton() {
         }
       }}
     >
-      <SquarePenIcon ref={iconRef} className="mr-2 size-4" />
-      <span className="text-sm">Compose</span>
+      {state === "collapsed" && !isMobile ? (
+        <SquarePenIcon ref={iconRef} className="size-4" />
+      ) : (
+        <>
+          <span className="text-center text-sm"> Compose</span>
+        </>
+      )}
     </Button>
   );
 }

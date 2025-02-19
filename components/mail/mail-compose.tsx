@@ -127,7 +127,10 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
   };
 
   const MAX_VISIBLE_ATTACHMENTS = 3;
-  const hasHiddenAttachments = attachments.length > MAX_VISIBLE_ATTACHMENTS;
+  const hasHiddenAttachments = React.useMemo(
+    () => attachments.length > MAX_VISIBLE_ATTACHMENTS,
+    [attachments],
+  );
 
   const truncateFileName = (name: string, maxLength = 15) => {
     if (name.length <= maxLength) return name;
@@ -139,7 +142,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
     return `${name.slice(0, maxLength)}...`;
   };
 
-  const renderAttachments = () => {
+  const renderAttachments = React.useCallback(() => {
     if (attachments.length === 0) return null;
 
     return (
@@ -284,7 +287,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
         )}
       </div>
     );
-  };
+  }, [attachments, hasHiddenAttachments]);
 
   return (
     <>
@@ -295,7 +298,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
             <CardTitle className="text-2xl font-semibold tracking-tight">New Message</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2.5">
+            <div className="grid gap-2">
               <div className="relative">
                 <Input
                   tabIndex={1}

@@ -90,27 +90,23 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="group data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="group mt-2 h-[32px] bg-transparent px-0 hover:bg-transparent data-[state=open]:text-sidebar-accent-foreground"
             >
               {isLoading ? (
                 <>
-                  <div className="size-7 animate-pulse rounded-lg bg-primary/10" />
-                  <div className="flex min-w-0 flex-col gap-0.5 leading-none">
-                    <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-                    <div className="h-2.5 w-32 animate-pulse rounded bg-muted" />
-                  </div>
+                  <div className="size-8 animate-pulse rounded-lg bg-primary/10" />
                 </>
               ) : (
                 <>
                   <Image
                     src={activeAccount?.picture || session?.user.image || "/logo.png"}
                     alt={activeAccount?.name || session?.user.name || "User"}
-                    className="size-7 rounded-md ring-1 ring-border/50"
+                    className="ring-none size-[32px] rounded-md object-fill ring-0 hover:bg-transparent"
                     width={28}
                     height={28}
                   />
                   <div className="flex min-w-0 flex-col gap-0.5 leading-none">
-                    <span className="font-medium tracking-tight">
+                    <span className="truncate font-medium tracking-tight">
                       {activeAccount?.name || session?.user.name || "User"}
                     </span>
                     <span className="truncate text-[11px] text-muted-foreground/70">
@@ -153,7 +149,7 @@ export function NavUser() {
                 <DropdownMenuItem
                   key={connection.id}
                   onClick={handleAccountSwitch(connection)}
-                  className={`flex cursor-pointer items-center gap-3 py-0.5 ${
+                  className={`flex cursor-pointer items-center gap-4 py-0.5 ${
                     connection.id === session?.connectionId ? "bg-accent" : ""
                   }`}
                 >
