@@ -1,3 +1,4 @@
+import { ConnectionError, AuthError, GenericError } from "@/components/ai/error-messages";
 import { createAI, createStreamableValue, getMutableAIState, streamUI } from "ai/rsc";
 import { Message, TextStreamMessage } from "@/components/ai/messages";
 import { EmailSummary } from "@/components/ai/email-summary";
@@ -59,6 +60,16 @@ interface ThreadsResponse {
 
 interface MailResponse {
   data: ThreadsResponse;
+}
+
+interface ConnectionResponse {
+  connections: Array<{
+    id: string;
+    email: string;
+    name: string;
+    picture: string;
+    createdAt: string;
+  }>;
 }
 
 // Helper function to analyze emails
@@ -227,6 +238,21 @@ When users want analysis or summaries, use the summarizeEmails tool.`,
             const toolCallId = generateId();
 
             try {
+              // First check if we have a vald connection
+              const connectionResponse = await $fetch<ConnectionResponse>(
+                "/api/v1/mail/connections",
+                {
+                  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+                },
+              );
+
+              console.log("📬 Connection response:", connectionResponse);
+
+              if (!connectionResponse?.data?.connections.length) {
+                console.error("🔒 No email connections found");
+                return <Message role="assistant" content={<ConnectionError />} />;
+              }
+
               const response = await $fetch<MailResponse>("/api/v1/mail", {
                 query: {
                   folder,
@@ -235,14 +261,13 @@ When users want analysis or summaries, use the summarizeEmails tool.`,
                 baseURL: process.env.NEXT_PUBLIC_APP_URL,
               });
 
-              console.log("📬 Fetch response:", {
-                status: "success",
-                threadsCount: response?.data?.data?.threads?.length ?? 0,
-              });
+              console.log("📬 Mail response:", response);
 
               if (!response?.data?.data?.threads?.length) {
                 console.log("📭 No emails found");
-                return <Message role="assistant" content="No emails found." />;
+                return (
+                  <Message role="assistant" content="No emails found in the specified folder." />
+                );
               }
 
               const emails = response.data.data.threads.map((thread: InitialThread) => ({
@@ -274,19 +299,21 @@ When users want analysis or summaries, use the summarizeEmails tool.`,
 ${emails.map((e: { subject: string; from: string }) => `\n- ${e.subject} (from: ${e.from})`).join("")}`}
                 />
               );
-            } catch (error) {
+            } catch (error: any) {
               console.error("❌ Error fetching emails:", {
                 error,
+                status: error.response?.status,
                 folder,
                 max,
                 baseURL: process.env.NEXT_PUBLIC_APP_URL,
               });
-              return (
-                <Message
-                  role="assistant"
-                  content="Sorry, I encountered an error while fetching your emails. Please try again."
-                />
-              );
+
+              // Check if it's an authentication error
+              if (error.response?.status === 401) {
+                return <Message role="assistant" content={<AuthError />} />;
+              }
+
+              return <Message role="assistant" content={<GenericError />} />;
             }
           },
         },
@@ -313,6 +340,21 @@ ${emails.map((e: { subject: string; from: string }) => `\n- ${e.subject} (from: 
             endDate.setHours(23, 59, 59, 999);
 
             try {
+              // First check if we have a valid connection
+              const connectionResponse = await $fetch<ConnectionResponse>(
+                "/api/v1/mail/connections",
+                {
+                  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+                },
+              );
+
+              console.log("📬 Connection response:", connectionResponse);
+
+              if (!connectionResponse?.data?.connections?.length) {
+                console.error("🔒 No email connections found");
+                return <Message role="assistant" content={<ConnectionError />} />;
+              }
+
               const afterDate = startDate.toISOString().split("T")[0];
               const beforeDate = endDate.toISOString().split("T")[0];
 
@@ -327,10 +369,7 @@ ${emails.map((e: { subject: string; from: string }) => `\n- ${e.subject} (from: 
                 baseURL: process.env.NEXT_PUBLIC_APP_URL,
               });
 
-              console.log("📬 Summary response:", {
-                status: "success",
-                threadsCount: response?.data?.data?.threads?.length ?? 0,
-              });
+              console.log("📬 Mail response:", response);
 
               if (!response?.data?.data?.threads?.length) {
                 console.log("📭 No emails found in period");
@@ -386,18 +425,20 @@ ${emails.map((e: { subject: string; from: string }) => `\n- ${e.subject} (from: 
                   content={<EmailSummary period={period} summary={summary} />}
                 />
               );
-            } catch (error) {
+            } catch (error: any) {
               console.error("❌ Error summarizing emails:", {
                 error,
+                status: error.response?.status,
                 period,
                 baseURL: process.env.NEXT_PUBLIC_APP_URL,
               });
-              return (
-                <Message
-                  role="assistant"
-                  content="Sorry, I encountered an error while fetching your emails. Please try again."
-                />
-              );
+
+              // Check if it's an authentication error
+              if (error.response?.status === 401) {
+                return <Message role="assistant" content={<AuthError />} />;
+              }
+
+              return <Message role="assistant" content={<GenericError />} />;
             }
           },
         },

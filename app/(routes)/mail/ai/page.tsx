@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useScrollToBottom } from "@/components/ai/use-scroll-to-bottom";
 import { Sparkles, AlertTriangle, BarChart3 } from "lucide-react";
+import { LoadingMessage } from "@/components/ai/loading-message";
 import { SidebarToggle } from "@/components/ui/sidebar-toggle";
 import { Textarea } from "@/components/ui/textarea";
 import { Message } from "@/components/ai/messages";
@@ -123,6 +124,7 @@ export default function AIPage() {
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((message) => message)}
+                {isProcessing && <LoadingMessage />}
                 <div ref={messagesEndRef} />
               </div>
             )}
