@@ -81,7 +81,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
           )}
         >
           <MailHeaderSkeleton isFullscreen={isFullscreen} />
-          <div className="h-full space-y-4 overflow-y-scroll">
+          <div className="h-full space-y-4 overflow-y-auto">
             <MailDisplaySkeleton isFullscreen={isFullscreen} />
           </div>
         </div>
@@ -196,7 +196,7 @@ export function ThreadDisplay({ mail, onClose, isMobile }: ThreadDisplayProps) {
           </div>
         </div>
 
-        <div className="h-full overflow-y-scroll">
+        <div className="h-full overflow-y-auto">
           {[...(emailData || [])].reverse().map((message, index) => (
             <div
               key={message.id}

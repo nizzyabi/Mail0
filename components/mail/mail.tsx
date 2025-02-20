@@ -211,7 +211,7 @@ export function Mail({ folder }: MailProps) {
                 )}
               </div>
 
-              <div className="h-[calc(100svh-(8px+8px+14px+44px-2px))] overflow-scroll p-2 pt-0">
+              <div className="h-[calc(100svh-(8px+8px+14px+44px-2px))] overflow-auto p-2 pt-0">
                 {isLoading || isTransitioning ? (
                   <div className="flex flex-col">
                     {[...Array(8)].map((_, i) => (
