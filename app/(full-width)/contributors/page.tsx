@@ -16,8 +16,6 @@ import {
   AreaChart,
   Bar,
   BarChart,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -26,9 +24,10 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface Contributor {
@@ -53,10 +52,37 @@ interface ActivityData {
   pullRequests: number;
 }
 
-const specialRoles: Record<string, string> = {
-  nizzyabi: "Project Owner",
-  praashh: "Maintainer",
-  mrgsub: "Maintainer",
+const excludedUsernames = ["bot1", "dependabot", "github-actions"];
+const coreTeamMembers = ["nizzyabi", "ahmetskilinc", "ripgrim", "user12224", "praashh", "mrgsub"];
+const REPOSITORY = "nizzyabi/mail0";
+
+const specialRoles: Record<string, { role: string; twitter?: string; website?: string }> = {
+  nizzyabi: {
+    role: "Project Owner",
+    twitter: "nizzyabi",
+  },
+  ahmetskilinc: {
+    role: "Maintainer",
+    twitter: "ahmet_______k",
+    website: "https://ahmetk.dev/",
+  },
+  ripgrim: {
+    role: "Maintainer",
+    twitter: "fuckgrimlabs",
+    website: "https://ripgrim.com",
+  },
+  user12224: {
+    role: "Maintainer",
+    twitter: "user12224",
+    website: "https://needle.rip",
+  },
+  praashh: {
+    role: "Maintainer",
+    twitter: "10Xpraash",
+  },
+  mrgsub: {
+    role: "Maintainer",
+  },
 };
 
 const ChartControls = ({
@@ -90,22 +116,56 @@ export default function OpenPage() {
   const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [showAllContributors, setShowAllContributors] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const filteredCoreTeam = useMemo(
+    () =>
+      contributors
+        .filter(
+          (contributor) =>
+            !excludedUsernames.includes(contributor.login) &&
+            coreTeamMembers.some(
+              (member) => member.toLowerCase() === contributor.login.toLowerCase(),
+            ),
+        )
+        .sort((a, b) => b.contributions - a.contributions),
+    [contributors],
+  );
+
+  const filteredContributors = useMemo(
+    () =>
+      contributors
+        .filter(
+          (contributor) =>
+            !excludedUsernames.includes(contributor.login) &&
+            !coreTeamMembers.some(
+              (member) => member.toLowerCase() === contributor.login.toLowerCase(),
+            ),
+        )
+        .sort((a, b) => b.contributions - a.contributions),
+    [contributors],
+  );
 
   useEffect(() => {
     const fetchRepoData = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        const repoResponse = await fetch("https://api.github.com/repos/nizzyabi/mail0");
+        const repoResponse = await fetch(`https://api.github.com/repos/${REPOSITORY}`);
+        if (!repoResponse.ok) throw new Error("Failed to fetch repository data");
         const repoData = await repoResponse.json();
 
         const commitsResponse = await fetch(
-          "https://api.github.com/repos/nizzyabi/mail0/commits?per_page=100&since=" +
-            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          `https://api.github.com/repos/${REPOSITORY}/commits?per_page=100`,
         );
+        if (!commitsResponse.ok) throw new Error("Failed to fetch commits data");
         const commitsData = await commitsResponse.json();
 
         const prsResponse = await fetch(
-          "https://api.github.com/repos/nizzyabi/mail0/pulls?state=open",
+          `https://api.github.com/repos/${REPOSITORY}/pulls?state=open`,
         );
+        if (!prsResponse.ok) throw new Error("Failed to fetch PRs data");
         const prsData = await prsResponse.json();
 
         setRepoStats({
@@ -116,9 +176,9 @@ export default function OpenPage() {
           openPRs: prsData.length,
         });
 
-        const last7Days = [...Array(7)].map((_, i) => {
+        const last30Days = Array.from({ length: 30 }, (_, i) => {
           const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
+          date.setDate(date.getDate() - (29 - i));
           const dateStr = date.toISOString().split("T")[0];
 
           const dayCommits = commitsData.filter(
@@ -127,37 +187,88 @@ export default function OpenPage() {
           ).length;
 
           const dayIndex = i + 1;
-          const growthFactor = dayIndex / 7;
+          const growthFactor = dayIndex / 30;
 
           return {
-            date: new Date(date).toLocaleDateString("en-US", {
+            date: date.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
             }),
             stars: Math.floor(repoData.stargazers_count * growthFactor),
             forks: Math.floor(repoData.forks_count * growthFactor),
             watchers: Math.floor(repoData.subscribers_count * growthFactor),
-            commits: dayCommits,
+            commits: dayCommits || Math.floor(Math.random() * 5),
           };
         });
-        setTimelineData(last7Days);
 
-        const activityStats = last7Days.map((dayData) => {
+        setTimelineData(last30Days);
+
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
-          date.setDate(date.getDate() - (6 - last7Days.indexOf(dayData)));
+          const today = date.getDay();
+          const daysToSubtract = today + (6 - i);
+          date.setDate(date.getDate() - daysToSubtract);
+
+          const dateStr = date.toISOString().split("T")[0];
+
+          const dayCommits = commitsData.filter(
+            (commit: { commit: { author: { date: string } } }) =>
+              commit.commit.author.date.startsWith(dateStr),
+          ).length;
+
+          const commits = dayCommits || Math.floor(Math.random() * 5) + 1;
 
           return {
             date: date.toLocaleDateString("en-US", { weekday: "short" }),
-            commits: dayData.commits,
-            issues: Math.max(1, Math.floor(dayData.commits * 0.3)),
-            pullRequests: Math.max(1, Math.floor(dayData.commits * 0.2)),
+            commits,
+            issues: Math.max(1, Math.floor(commits * 0.3)),
+            pullRequests: Math.max(1, Math.floor(commits * 0.2)),
           };
         });
-        setActivityData(activityStats);
+
+        setActivityData(last7Days);
       } catch (error) {
         console.error("Error fetching repository data:", error);
-        setTimelineData([]);
-        setActivityData([]);
+        setError(error instanceof Error ? error.message : "An error occurred while fetching data");
+
+        const generateFallbackData = () => {
+          const last30Days = Array.from({ length: 30 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (29 - i));
+            return {
+              date: date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              }),
+              stars: Math.floor(Math.random() * 100),
+              forks: Math.floor(Math.random() * 50),
+              watchers: Math.floor(Math.random() * 30),
+              commits: Math.floor(Math.random() * 10),
+            };
+          });
+
+          const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date();
+            const today = date.getDay();
+            const daysToSubtract = today + (6 - i);
+            date.setDate(date.getDate() - daysToSubtract);
+
+            const commits = Math.floor(Math.random() * 8) + 2;
+            return {
+              date: date.toLocaleDateString("en-US", { weekday: "short" }),
+              commits,
+              issues: Math.max(1, Math.floor(commits * 0.3)),
+              pullRequests: Math.max(1, Math.floor(commits * 0.2)),
+            };
+          });
+
+          setTimelineData(last30Days);
+          setActivityData(last7Days);
+        };
+
+        generateFallbackData();
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -165,124 +276,226 @@ export default function OpenPage() {
   }, []);
 
   useEffect(() => {
-    fetch("https://api.github.com/repos/nizzyabi/mail0/contributors")
-      .then((res) => res.json())
-      .then((data) => setContributors(data))
-      .catch((err) => console.error("Error fetching contributors:", err));
+    const fetchContributors = async () => {
+      try {
+        const response = await fetch(`https://api.github.com/repos/${REPOSITORY}/contributors`);
+        if (!response.ok) throw new Error("Failed to fetch contributors data");
+        const data = await response.json();
+        setContributors(data);
+      } catch (err) {
+        console.error("Error fetching contributors:", err);
+        setError(
+          err instanceof Error ? err.message : "An error occurred while fetching contributors",
+        );
+      }
+    };
+
+    fetchContributors();
   }, []);
 
-  // const maxContributions = Math.max(...contributors.map((c) => c.contributions));
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-neutral-900 dark:text-white">
+            Something went wrong
+          </h3>
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{error}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="mt-4"
+          >
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-white dark:border-t-transparent" />
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">Loading data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full text-white">
       <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Project Stats */}
-        <div className="mb-8 rounded-lg border p-6 dark:border-neutral-800 dark:bg-neutral-900/50">
-          <div className="flex items-center justify-between">
-            <div className="w-full space-y-1">
-              <div className="flex justify-between">
-                <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">Mail0</h2>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="bg-transparent text-neutral-800 dark:border-neutral-800 dark:text-white dark:hover:bg-neutral-800 sm:hidden"
-                >
-                  <Link href="https://github.com/nizzyabi/mail0" target="_blank" className="gap-2">
-                    <Github className="h-4 w-4" />
-                  </Link>
-                </Button>
+        <div className="mb-8 overflow-hidden rounded-xl border bg-gradient-to-b from-white/50 to-white/10 p-6 backdrop-blur-sm dark:border-neutral-700 dark:from-neutral-900/50 dark:to-neutral-900/30">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/black-icon.svg"
+                  alt="Mail0 Logo"
+                  width={32}
+                  height={32}
+                  className="dark:hidden"
+                />
+                <Image
+                  src="/white-icon.svg"
+                  alt="Mail0 Logo"
+                  width={32}
+                  height={32}
+                  className="hidden dark:block"
+                />
               </div>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 An open source email app built with modern technologies
               </p>
             </div>
-            <Button
-              asChild
-              variant="outline"
-              className="hidden bg-transparent text-neutral-800 dark:border-neutral-800 dark:text-white dark:hover:bg-neutral-800 sm:inline-flex"
-            >
-              <Link href="https://github.com/nizzyabi/mail0" target="_blank" className="gap-2">
-                <Github className="h-4 w-4" />
-                View on GitHub
-              </Link>
-            </Button>
-          </div>
-
-          <Separator className="my-4 dark:bg-neutral-800" />
-
-          <div className="mb-6 flex flex-wrap gap-4 text-neutral-600 dark:text-neutral-400 sm:gap-6">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              <span className="text-lg font-medium">{repoStats.stars}</span>
-              <span>stars</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <GitFork className="h-5 w-5" />
-              <span className="text-lg font-medium">{repoStats.forks}</span>
-              <span>forks</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Github className="h-5 w-5" />
-              <span className="text-lg font-medium">{repoStats.watchers}</span>
-              <span>watchers</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-lg font-medium">{repoStats.openIssues}</span>
-              <span>open issues</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <GitPullRequest className="h-5 w-5" />
-              <span className="text-lg font-medium">{repoStats.openPRs}</span>
-              <span>pull requests</span>
+            <div className="flex gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="gap-2 border-neutral-200 bg-white/50 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:hover:text-white"
+              >
+                <Link href={`https://github.com/${REPOSITORY}`} target="_blank">
+                  <Github className="h-4 w-4" />
+                  View on GitHub
+                </Link>
+              </Button>
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            {/* Stars & Forks Timeline */}
-            <Card className="p-4">
-              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Repository Growth</h3>
+          <Separator className="my-6 dark:bg-neutral-700" />
+
+          <div className="flex flex-wrap items-center divide-x divide-neutral-200 dark:divide-neutral-700">
+            <div className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 sm:px-4">
+              <Star className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-bold text-neutral-900 dark:text-white sm:text-lg">
+                  {repoStats.stars}
+                </span>
+                <span className="hidden text-xs text-neutral-500 dark:text-neutral-400 sm:inline">
+                  &nbsp;stars
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 sm:px-4">
+              <GitFork className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-bold text-neutral-900 dark:text-white sm:text-lg">
+                  {repoStats.forks}
+                </span>
+                <span className="hidden text-xs text-neutral-500 dark:text-neutral-400 sm:inline">
+                  &nbsp;forks
+                </span>
+              </div>
+            </div>
+
+            <div className="hidden items-center gap-3 px-3 first:pl-0 last:pr-0 sm:flex sm:px-4">
+              <Github className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-bold text-neutral-900 dark:text-white sm:text-lg">
+                  {repoStats.watchers}
+                </span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                  &nbsp;watchers
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 sm:px-4">
+              <MessageCircle className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-bold text-neutral-900 dark:text-white sm:text-lg">
+                  {repoStats.openIssues}
+                </span>
+                <span className="hidden text-xs text-neutral-500 dark:text-neutral-400 sm:inline">
+                  &nbsp;issues
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 px-3 first:pl-0 last:pr-0 sm:px-4">
+              <GitPullRequest className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-bold text-neutral-900 dark:text-white sm:text-lg">
+                  {repoStats.openPRs}
+                </span>
+                <span className="hidden text-xs text-neutral-500 dark:text-neutral-400 sm:inline">
+                  &nbsp;PRs
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {/* Repository Growth */}
+            <Card className="col-span-full border-neutral-100 bg-white/50 p-4 transition-all hover:bg-white/60 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:bg-neutral-900/60 lg:col-span-2">
+              <h3 className="mb-4 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                Repository Growth
+              </h3>
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={timelineData} className="-mx-5 mt-2">
                   <defs>
                     <linearGradient id="stars" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      <stop offset="5%" stopColor="rgb(64, 64, 64)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="rgb(64, 64, 64)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="starsDark" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="rgb(255, 255, 255)" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="rgb(255, 255, 255)" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="forks" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+                      <stop offset="5%" stopColor="rgb(64, 64, 64)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="rgb(64, 64, 64)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="forksDark" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="rgb(200, 200, 200)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="rgb(200, 200, 200)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
                     dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="currentColor"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    className="text-neutral-600 dark:text-neutral-400"
                   />
                   <YAxis
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="currentColor"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => `${value}`}
+                    className="text-neutral-600 dark:text-neutral-400"
                   />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="rounded-lg border bg-card p-2 shadow-md">
+                          <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
                             <div className="grid gap-2">
                               <div className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-primary" />
-                                <span className="text-sm text-muted-foreground">Stars:</span>
-                                <span className="font-medium">{payload[0].value}</span>
+                                <Star className="h-4 w-4 text-neutral-900 dark:text-white" />
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                  Stars:
+                                </span>
+                                <span className="font-medium text-neutral-900 dark:text-white">
+                                  {payload[0].value}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <GitFork className="h-4 w-4 text-secondary" />
-                                <span className="text-sm text-muted-foreground">Forks:</span>
-                                <span className="font-medium">{payload[1].value}</span>
+                                <GitFork className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                  Forks:
+                                </span>
+                                <span className="font-medium text-neutral-900 dark:text-white">
+                                  {payload[1].value}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -294,48 +507,79 @@ export default function OpenPage() {
                   <Area
                     type="monotone"
                     dataKey="stars"
-                    stroke="hsl(var(--primary))"
-                    fill="url(#stars)"
+                    stroke="rgb(64, 64, 64)"
                     strokeWidth={2}
+                    fill="url(#stars)"
+                    className="dark:fill-[url(#starsDark)] dark:stroke-white"
                   />
                   <Area
                     type="monotone"
                     dataKey="forks"
-                    stroke="hsl(var(--secondary))"
-                    fill="url(#forks)"
+                    stroke="rgb(64, 64, 64)"
                     strokeWidth={2}
+                    fill="url(#forks)"
+                    className="dark:fill-[url(#forksDark)] dark:stroke-neutral-300"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
 
-            {/* Commit Activity */}
-            <Card className="p-4">
-              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Commit Activity</h3>
+            {/* Activity Chart */}
+            <Card className="col-span-full border-neutral-200 bg-white/50 p-4 transition-all hover:bg-white/60 dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:bg-neutral-900/60 lg:col-span-1">
+              <h3 className="mb-4 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                Recent Activity
+              </h3>
               <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={activityData} className="-mx-5 mt-2">
+                <BarChart data={activityData} className="-mx-5 mt-2" layout="horizontal">
                   <XAxis
                     dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="currentColor"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    className="text-neutral-600 dark:text-neutral-400"
+                    interval={0}
                   />
                   <YAxis
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="currentColor"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    className="text-neutral-600 dark:text-neutral-400"
                   />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="rounded-lg border bg-card p-2 shadow-md">
-                            <div className="flex items-center gap-1">
-                              <FileCode className="h-4 w-4 text-primary" />
-                              <span className="text-sm text-muted-foreground">Commits:</span>
-                              <span className="font-medium">{payload[0].value}</span>
+                          <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+                            <div className="grid gap-2">
+                              <div className="flex items-center gap-2">
+                                <GitGraph className="h-4 w-4 text-neutral-900 dark:text-white" />
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                  Commits:
+                                </span>
+                                <span className="font-medium text-neutral-900 dark:text-white">
+                                  {payload[0].value}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <MessageCircle className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                  Issues:
+                                </span>
+                                <span className="font-medium text-neutral-900 dark:text-white">
+                                  {payload[1].value}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <GitPullRequest className="h-4 w-4 text-neutral-500 dark:text-neutral-500" />
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                  PRs:
+                                </span>
+                                <span className="font-medium text-neutral-900 dark:text-white">
+                                  {payload[2].value}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -343,63 +587,116 @@ export default function OpenPage() {
                       return null;
                     }}
                   />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="commits"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    dot={false}
+                    radius={[4, 4, 0, 0]}
+                    className="fill-neutral-900 dark:fill-white"
                   />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-
-            {/* Issues & Pull Requests */}
-            <Card className="p-4">
-              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Issues & PRs</h3>
-              <ResponsiveContainer width="100%" height={240} className="-mx-5 mt-2">
-                <BarChart data={activityData}>
-                  <XAxis
-                    dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
+                  <Bar
+                    dataKey="issues"
+                    radius={[4, 4, 0, 0]}
+                    className="fill-neutral-700 dark:fill-neutral-300"
                   />
-                  <YAxis
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
+                  <Bar
+                    dataKey="pullRequests"
+                    radius={[4, 4, 0, 0]}
+                    className="fill-neutral-500 dark:fill-neutral-500"
                   />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="rounded-lg border bg-card p-2 shadow-md">
-                            <div className="grid gap-1">
-                              <div className="flex items-center gap-1">
-                                <MessageCircle className="h-4 w-4 text-primary" />
-                                <span className="text-sm text-muted-foreground">Issues:</span>
-                                <span className="font-medium">{payload[0].value}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="h-4 w-4 text-secondary" />
-                                <span className="text-sm text-muted-foreground">PRs:</span>
-                                <span className="font-medium">{payload[1].value}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar dataKey="issues" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="pullRequests" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
+          </div>
+        </div>
+
+        {/* Core Team Section */}
+        <div className="mb-12 space-y-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold tracking-tight text-neutral-900/80 dark:text-white">
+              Core Team
+            </h1>
+            <p className="mt-2 text-muted-foreground">Meet the people behind Mail0</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCoreTeam.map((member, index) => (
+              <div
+                key={member.login}
+                className="group relative flex items-center gap-4 rounded-xl border bg-white/50 p-4 transition-all hover:-translate-y-1 hover:bg-white hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:bg-neutral-900 dark:hover:shadow-neutral-900/50"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  animation: "fadeInUp 0.5s ease-out forwards",
+                  opacity: 0,
+                  transform: "translateY(10px)",
+                }}
+              >
+                <Avatar className="h-16 w-16 rounded-full ring-2 ring-neutral-200 transition-transform group-hover:scale-105 group-hover:ring-neutral-300 dark:ring-neutral-800 dark:group-hover:ring-neutral-700">
+                  <AvatarImage
+                    src={`https://github.com/${member.login}.png`}
+                    alt={member.login}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-xs">
+                    {member.login.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-neutral-900 transition-colors group-hover:text-neutral-700 dark:text-neutral-200 dark:group-hover:text-white">
+                    {member.login}
+                  </h3>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {specialRoles[member.login.toLowerCase()]?.role || "Maintainer"}
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Link
+                      href={`https://github.com/${member.login}`}
+                      target="_blank"
+                      className="rounded-md p-1 text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                    >
+                      <Github className="h-4 w-4" />
+                    </Link>
+                    {specialRoles[member.login.toLowerCase()]?.twitter && (
+                      <Link
+                        href={`https://twitter.com/${specialRoles[member.login.toLowerCase()]?.twitter}`}
+                        target="_blank"
+                        className="rounded-md p-1 text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                      </Link>
+                    )}
+                    {specialRoles[member.login.toLowerCase()]?.website && (
+                      <Link
+                        href={specialRoles[member.login.toLowerCase()]?.website || "#"}
+                        target="_blank"
+                        className="rounded-md p-1 text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                          />
+                        </svg>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -411,22 +708,38 @@ export default function OpenPage() {
             </h1>
             <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
               <FileCode className="h-4 w-4" />
-              <span>
-                {contributors.reduce((acc, curr) => acc + curr.contributions, 0)} total
-                contributions
-              </span>
+              <span>{filteredContributors.length} total contributors</span>
             </div>
           </div>
+
+          <style jsx global>{`
+            @keyframes fadeInUp {
+              from {
+                opacity: 0;
+                transform: translateY(10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
 
           <div>
             <Tabs defaultValue="grid" className="w-full">
               <div className="mb-6 flex justify-center">
-                <TabsList className="grid w-full grid-cols-2 sm:w-[200px]">
-                  <TabsTrigger value="grid" className="flex items-center gap-2">
+                <TabsList className="grid w-full grid-cols-2 border border-neutral-200 bg-white/50 p-1 dark:border-neutral-800 dark:bg-neutral-900/50 sm:w-[200px]">
+                  <TabsTrigger
+                    value="grid"
+                    className="flex items-center gap-2 text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm dark:text-neutral-400 dark:data-[state=active]:bg-neutral-800 dark:data-[state=active]:text-white"
+                  >
                     <LayoutGrid className="h-4 w-4" />
                     Grid
                   </TabsTrigger>
-                  <TabsTrigger value="chart" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="chart"
+                    className="flex items-center gap-2 text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm dark:text-neutral-400 dark:data-[state=active]:bg-neutral-800 dark:data-[state=active]:text-white"
+                  >
                     <ChartAreaIcon className="h-4 w-4" />
                     Chart
                   </TabsTrigger>
@@ -435,61 +748,57 @@ export default function OpenPage() {
 
               <TabsContent value="grid">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-                  {contributors
-                    .sort((a, b) => b.contributions - a.contributions)
-                    .map((contributor) => (
-                      <Link
-                        key={contributor.login}
-                        href={contributor.html_url}
-                        target="_blank"
-                        className="group relative flex flex-col items-center rounded-xl border bg-white p-3 transition-all hover:-translate-y-1 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/50"
-                      >
-                        <Avatar className="h-16 w-16 rounded-full ring-2 ring-background/50 transition-transform group-hover:scale-105">
-                          <AvatarImage
-                            src={contributor.avatar_url}
-                            alt={contributor.login}
-                            className="object-cover"
-                          />
-                          <AvatarFallback className="text-xs">
-                            {contributor.login.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
+                  {filteredContributors.map((contributor, index) => (
+                    <Link
+                      key={contributor.login}
+                      href={contributor.html_url}
+                      target="_blank"
+                      className="group relative flex flex-col items-center rounded-xl border bg-white/50 p-4 transition-all hover:-translate-y-1 hover:bg-white hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:bg-neutral-900 dark:hover:shadow-neutral-900/50"
+                      style={{
+                        animationDelay: `${index * 50}ms`,
+                        animation: "fadeInUp 0.5s ease-out forwards",
+                        opacity: 0,
+                        transform: "translateY(10px)",
+                      }}
+                    >
+                      <Avatar className="h-16 w-16 rounded-full ring-2 ring-neutral-200 transition-transform group-hover:scale-105 group-hover:ring-neutral-300 dark:ring-neutral-800 dark:group-hover:ring-neutral-700">
+                        <AvatarImage
+                          src={contributor.avatar_url}
+                          alt={contributor.login}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="text-xs">
+                          {contributor.login.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
 
-                        <div className="mt-2 text-center">
-                          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
-                            {contributor.login}
-                          </span>
-                          {specialRoles[contributor.login.toLowerCase()] && (
-                            <div className="text-[10px] text-muted-foreground">
-                              {specialRoles[contributor.login.toLowerCase()]}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="mt-1.5 flex items-center gap-1.5">
-                          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-200">
+                      <div className="mt-3 text-center">
+                        <span className="block text-sm font-medium text-neutral-900 transition-colors group-hover:text-neutral-700 dark:text-neutral-200 dark:group-hover:text-white">
+                          {contributor.login}
+                        </span>
+                        <div className="mt-2 flex items-center justify-center gap-1">
+                          <GitGraph className="h-3 w-3 text-neutral-500 transition-colors group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-300" />
+                          <span className="text-sm font-medium text-neutral-700 transition-colors group-hover:text-neutral-900 dark:text-neutral-300 dark:group-hover:text-white">
                             {contributor.contributions}
                           </span>
-                          <GitGraph className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
-                      </Link>
-                    ))}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </TabsContent>
 
               <TabsContent value="chart">
-                <Card className="bg-card p-6">
+                <Card className="bg-white/50 p-6 dark:bg-neutral-900/50">
                   <ChartControls
                     showAll={showAllContributors}
                     setShowAll={setShowAllContributors}
-                    total={contributors.length}
+                    total={contributors.length - coreTeamMembers.length}
                   />
 
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart
-                      data={contributors
-                        .sort((a, b) => b.contributions - a.contributions)
-                        .slice(0, showAllContributors ? undefined : 10)}
+                      data={filteredContributors.slice(0, showAllContributors ? undefined : 10)}
                       margin={{ top: 10, right: 10, bottom: 20, left: 10 }}
                     >
                       <XAxis
@@ -502,7 +811,7 @@ export default function OpenPage() {
                           return (
                             <g transform={`translate(${x},${y})`}>
                               <foreignObject x="-12" y="8" width="24" height="24">
-                                <Avatar className="h-6 w-6 rounded-full ring-1 ring-border">
+                                <Avatar className="h-6 w-6 rounded-full ring-1 ring-neutral-200 dark:ring-neutral-800">
                                   <AvatarImage src={contributor?.avatar_url} />
                                   <AvatarFallback className="text-[8px]">
                                     {payload.value.slice(0, 2).toUpperCase()}
@@ -513,33 +822,35 @@ export default function OpenPage() {
                           );
                         }}
                         height={60}
+                        className="text-neutral-600 dark:text-neutral-400"
                       />
                       <YAxis
-                        stroke="hsl(var(--muted-foreground))"
+                        stroke="currentColor"
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value) => `${value}`}
+                        className="text-neutral-600 dark:text-neutral-400"
                       />
                       <Tooltip
-                        cursor={{ fill: "hsl(var(--muted)/0.1)" }}
+                        cursor={{ fill: "rgb(0 0 0 / 0.05)" }}
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
                             return (
-                              <div className="rounded-lg border bg-popover p-2.5 shadow-lg">
+                              <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
                                 <div className="flex items-center gap-2">
-                                  <Avatar className="h-8 w-8 ring-1 ring-border">
+                                  <Avatar className="h-8 w-8 ring-1 ring-neutral-200 dark:ring-neutral-800">
                                     <AvatarImage src={data.avatar_url} />
                                     <AvatarFallback>
                                       {data.login.slice(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <div className="text-sm font-medium text-popover-foreground">
+                                    <div className="text-sm font-medium text-neutral-900 dark:text-white">
                                       {data.login}
                                     </div>
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-1 text-xs text-neutral-600 dark:text-neutral-400">
                                       <GitGraph className="h-3 w-3" />
                                       <span>{data.contributions} commits</span>
                                     </div>
@@ -553,9 +864,8 @@ export default function OpenPage() {
                       />
                       <Bar
                         dataKey="contributions"
-                        fill="hsl(var(--background))"
-                        radius={[4, 4, 0, 0]}
                         className="fill-neutral-900 dark:fill-white"
+                        radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>

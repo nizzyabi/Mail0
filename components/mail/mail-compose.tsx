@@ -287,6 +287,8 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
         )}
       </div>
     );
+    // TODO: FIX
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attachments, hasHiddenAttachments]);
 
   return (

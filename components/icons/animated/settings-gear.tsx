@@ -56,14 +56,15 @@ const SettingsGearIcon = forwardRef<SettingsGearIconHandle, HTMLAttributes<HTMLD
       >
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
-          width="15"
-          height="15"
+          width="17"
+          height="17"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          className="relative bottom-0.5"
           transition={{ type: "spring", stiffness: 50, damping: 10 }}
           variants={{
             normal: {

@@ -77,8 +77,8 @@ const MessageCircleIcon = forwardRef<MessageCircleIconHandle, HTMLAttributes<HTM
       >
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
-          width="15"
-          height="15"
+          width="17"
+          height="17"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -87,6 +87,7 @@ const MessageCircleIcon = forwardRef<MessageCircleIconHandle, HTMLAttributes<HTM
           strokeLinejoin="round"
           variants={iconVariants}
           animate={controls}
+          className="relative bottom-0.5"
         >
           <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
         </motion.svg>

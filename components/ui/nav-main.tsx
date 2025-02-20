@@ -2,9 +2,18 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useEffect, useMemo } from "react";
-import { cn } from "@/lib/utils";
 import * as React from "react";
 import Link from "next/link";
+
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarGroupLabel,
+  SidebarMenuButton,
+} from "./sidebar";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   ref?: React.Ref<SVGSVGElement>;
@@ -21,17 +30,13 @@ interface NavItemProps {
   isExpanded?: boolean;
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   suffix?: React.ComponentType<IconProps>;
-  subItems?: Array<{
-    title: string;
-    url: string;
-    isActive?: boolean;
-  }>;
 }
 
 interface NavMainProps {
   items: {
     title: string;
     items: NavItemProps[];
+    isActive?: boolean;
   }[];
 }
 
@@ -78,81 +83,65 @@ export function NavMain({ items }: NavMainProps) {
   }, [pathname, searchParams]);
 
   return (
-    <nav className="space-y-2.5">
-      <div className="space-y-6">
-        {items.map((section, i) => (
-          <div key={i}>
-            {section.title && (
-              <h2 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">
-                {section.title}
-              </h2>
-            )}
-            <div className="space-y-1">
-              {section.items.map((item, j) => (
-                <div key={j} className="px-3">
-                  <Link
-                    href={item.url}
-                    onClick={item.onClick}
-                    className={cn(
-                      "flex items-center justify-between rounded-lg px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                      (item.isActive || isUrlActive(item.url)) &&
-                        "bg-accent/90 font-semibold text-accent-foreground",
-                    )}
-                    onMouseEnter={() => {
-                      const iconRef = iconRefs.current[item.title]?.current;
-                      if (iconRef?.startAnimation) {
-                        iconRef.startAnimation();
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      const iconRef = iconRefs.current[item.title]?.current;
-                      if (iconRef?.stopAnimation) {
-                        iconRef.stopAnimation();
-                      }
-                    }}
-                  >
-                    <div className="flex items-center">
-                      {item.icon && (
-                        <item.icon
-                          ref={iconRefs.current[item.title]}
-                          className="mr-3 h-3.5 w-3.5"
-                        />
-                      )}
-                      <span className="text-[13px]">{item.title}</span>
-                    </div>
-                    <div className="flex items-center">
-                      {item.suffix && (
-                        <item.suffix
+    <SidebarGroup className="space-y-2.5 py-0">
+      <SidebarMenu className="space-y-3">
+        {items.map((section) => (
+          <Collapsible
+            key={section.title}
+            defaultOpen={section.isActive}
+            className="group/collapsible"
+          >
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                {section.title && (
+                  <SidebarGroupLabel className="mb-2">{section.title}</SidebarGroupLabel>
+                )}
+              </CollapsibleTrigger>
+              <div className="space-y-1">
+                {section.items.map((item, j) => (
+                  <Collapsible defaultOpen={item.isActive} key={j}>
+                    <CollapsibleTrigger asChild>
+                      <Link
+                        href={item.url}
+                        onClick={item.onClick}
+                        onMouseEnter={() => {
+                          const iconRef = iconRefs.current[item.title]?.current;
+                          if (iconRef?.startAnimation) {
+                            iconRef.startAnimation();
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          const iconRef = iconRefs.current[item.title]?.current;
+                          if (iconRef?.stopAnimation) {
+                            iconRef.stopAnimation();
+                          }
+                        }}
+                      >
+                        <SidebarMenuButton
+                          tooltip={item.title}
                           className={cn(
-                            "ml-2 h-4 w-4 transform transition-transform duration-200 ease-in-out",
-                            item.isExpanded && "rotate-180",
-                          )}
-                        />
-                      )}
-                    </div>
-                  </Link>
-                  {item.isExpanded && item.subItems && (
-                    <div className="ml-6 space-y-1 py-1">
-                      {item.subItems.map((subItem, k) => (
-                        <Link
-                          key={k}
-                          href={subItem.url}
-                          className={cn(
-                            "mx-1 flex items-center justify-between rounded-md px-1.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                            subItem.isActive && "bg-accent font-bold text-accent-foreground",
+                            "flex items-center",
+                            (item.isActive || isUrlActive(item.url)) &&
+                              "bg-accent text-accent-foreground",
                           )}
                         >
-                          {subItem.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+                          {item.icon && (
+                            <item.icon
+                              ref={iconRefs.current[item.title]}
+                              className="relative mr-3 h-3 w-3.5"
+                            />
+                          )}
+                          <p className="mt-0.5 text-[13px]">{item.title}</p>
+                        </SidebarMenuButton>
+                      </Link>
+                    </CollapsibleTrigger>
+                  </Collapsible>
+                ))}
+              </div>
+            </SidebarMenuItem>
+          </Collapsible>
         ))}
-      </div>
-    </nav>
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }

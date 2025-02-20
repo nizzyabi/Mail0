@@ -8,12 +8,12 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, SlidersHorizontal, CalendarIcon } from "lucide-react";
 import { useSearchValue } from "@/hooks/use-search-value";
+import { useState, useEffect, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 import { type DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
 import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
@@ -77,21 +77,23 @@ export function SearchBar() {
     },
   });
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const submitSearch = useCallback(
+    (data: { subject: string; from: string; to: string; q: string }) => {
+      // add logic for other fields
+      setSearchValue({
+        value: data.q,
+        highlight: data.q,
+      });
+    },
+    [setSearchValue],
+  );
+
   useEffect(() => {
     const subscription = form.watch((data) => {
       submitSearch(data as { subject: string; from: string; to: string; q: string });
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
-
-  const submitSearch = (data: { subject: string; from: string; to: string; q: string }) => {
-    // add logic for other fields
-    setSearchValue({
-      value: data.q,
-      highlight: data.q,
-    });
-  };
+  }, [form.watch, form, submitSearch]);
 
   const resetSearch = () => {
     form.reset();

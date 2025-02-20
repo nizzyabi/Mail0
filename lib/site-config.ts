@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-const TITLE = "mail0";
+const TITLE = "0 Email";
 const DESCRIPTION = "An Open Source Gmail Alternative.";
 
 const BASE_URL = "https://mail0.io";
@@ -11,7 +11,7 @@ export const siteConfig: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  applicationName: "mail0",
+  applicationName: "0 Email",
   creator: "Open Source Developers",
 
   category: "AU",
