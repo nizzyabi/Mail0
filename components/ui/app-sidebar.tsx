@@ -1,6 +1,6 @@
 "use client";
 
-import { SquarePenIcon, SquarePenIconHandle } from "../icons/animated/square-pen";
+import { SquarePenIcon, SquarePenIconHandle } from "@/components/icons/animated/square-pen";
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
 import { SidebarThemeSwitch } from "@/components/theme/sidebar-theme-switcher";
 import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";

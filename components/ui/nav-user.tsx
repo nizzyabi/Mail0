@@ -27,7 +27,7 @@ export function NavUser() {
 
   const activeAccount = useMemo(() => {
     if (!session) return null;
-    return connections?.find((connection) => connection.id === session?.connectionId);
+    return connections?.find((connection) => connection.id === session.connectionId);
   }, [session, connections]);
 
   const handleAccountSwitch = (connection: IConnection) => () => {

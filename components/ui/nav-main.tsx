@@ -100,14 +100,16 @@ export function NavMain({ items }: NavMainProps) {
   // Checks if the given URL matches the current URL path and required search parameters.
   const isUrlActive = useMemo(() => {
     return (url: string) => {
-      const urlObj = new URL(url, typeof window === "undefined" ? "/" : window.location.origin);
+      const [urlPath, urlQuery] = url.split("?");
       const cleanPath = pathname.replace(/\/$/, "");
-      const cleanUrl = urlObj.pathname.replace(/\/$/, "");
+      const cleanUrl = urlPath.replace(/\/$/, "");
 
       if (cleanPath !== cleanUrl) return false;
 
-      const urlParams = new URLSearchParams(urlObj.search);
+      const urlParams = new URLSearchParams(urlQuery || "");
       const currentParams = new URLSearchParams(searchParams);
+
+      if ([...urlParams.keys()].length !== [...currentParams.keys()].length) return false;
 
       for (const [key, value] of urlParams) {
         if (currentParams.get(key) !== value) return false;
