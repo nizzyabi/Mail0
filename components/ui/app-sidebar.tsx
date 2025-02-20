@@ -12,7 +12,6 @@ import React, { useMemo, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { $fetch } from "@/lib/auth-client";
 import { BASE_URL } from "@/lib/constants";
-import { useTheme } from "next-themes";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { Button } from "./button";
@@ -26,7 +25,7 @@ const fetchStats = async () => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: stats } = useSWR<number[]>("/api/v1/mail/count", fetchStats);
   const pathname = usePathname();
-  const { theme } = useTheme();
+
   const { currentSection, navItems } = useMemo(() => {
     // Find which section we're in based on the pathname
     const section = Object.entries(navigationConfig).find(([, config]) =>
@@ -116,18 +115,8 @@ function ComposeButton() {
     <Button
       onClick={open}
       className="relative isolate mt-1 h-8 w-[calc(100%)] overflow-hidden whitespace-nowrap bg-secondary text-primary shadow-[0_1px_theme(colors.white/0.07)_inset,0_1px_3px_theme(colors.black/0.05)] ring-1 ring-black/5 before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-gradient-to-b before:from-white/20 before:opacity-50 before:transition-opacity hover:bg-secondary/90 hover:before:opacity-100 dark:shadow-[0_1px_theme(colors.white/0.07)_inset,0_1px_3px_theme(colors.black/0.05)] dark:ring-white/5"
-      onMouseEnter={() => {
-        const icon = iconRef.current;
-        if (icon?.startAnimation) {
-          icon.startAnimation();
-        }
-      }}
-      onMouseLeave={() => {
-        const icon = iconRef.current;
-        if (icon?.stopAnimation) {
-          icon.stopAnimation();
-        }
-      }}
+      onMouseEnter={() => () => iconRef.current?.startAnimation?.()}
+      onMouseLeave={() => () => iconRef.current?.stopAnimation?.()}
     >
       {state === "collapsed" && !isMobile ? (
         <SquarePenIcon ref={iconRef} className="size-4" />
