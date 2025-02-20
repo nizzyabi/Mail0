@@ -15,13 +15,39 @@ import { emailProviders } from "@/constants/emailProviders";
 import { useConnections } from "@/hooks/use-connections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import axios from "axios";
 
 export default function ConnectionsPage() {
-  const { data: connections, isLoading } = useConnections();
+  const { data: connections, isLoading, mutate } = useConnections();
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
+  const { data: session } = useSession();
+
+  const handleDelete = (connectionId: string) => {
+    if (!session) return;
+
+    const remainingConnections = connections?.filter(
+      (connection) => connection.id !== connectionId,
+    );
+
+    return axios
+      .delete(`/api/v1/mail/connections/${connectionId}`)
+      .then(() => {
+        if (remainingConnections?.length) {
+          return axios.put(`/api/v1/mail/connections/${remainingConnections[0].id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        }
+      })
+      .then(() => mutate())
+      .catch(console.error);
+  };
 
   return (
     <div className="grid gap-6">
@@ -113,7 +139,9 @@ export default function ConnectionsPage() {
                           <Button variant="outline">Cancel</Button>
                         </DialogClose>
                         <DialogClose asChild>
-                          <Button variant="destructive">Remove</Button>
+                          <Button onClick={() => handleDelete(connection.id)} variant="destructive">
+                            Remove
+                          </Button>
                         </DialogClose>
                       </div>
                     </DialogContent>
