@@ -47,6 +47,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
   const [attachments, setAttachments] = React.useState<File[]>([]);
   const [toInput, setToInput] = React.useState(replyTo?.email || "");
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [disableSend, setDisableSend] = React.useState<boolean>(true);
 
   const [subject, setSubject] = useQueryState("subject", {
     defaultValue: "",
@@ -58,6 +59,14 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
     parse: (value) => decompressText(value),
     serialize: (value) => compressText(value),
   });
+
+  React.useEffect(() => {
+    if (toInput && subject) {
+      setDisableSend(false);
+    } else {
+      setDisableSend(true);
+    }
+  }, [toInput, subject]);
 
   const { isOpen } = useOpenComposeModal();
 
@@ -434,7 +443,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                       handleDraft();
                       onClose();
                     }}
-                    disabled={!toInput && !messageContent}
+                    disabled={disableSend}
                   >
                     Save as draft
                   </Button>
@@ -444,7 +453,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                       // TODO: Implement send functionality
                       onClose();
                     }}
-                    disabled={!toInput && !messageContent}
+                    disabled={disableSend}
                   >
                     Send
                     <Send className="ml-2 h-3 w-3" />
