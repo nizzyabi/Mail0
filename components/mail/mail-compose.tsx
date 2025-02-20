@@ -47,6 +47,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
   const [attachments, setAttachments] = React.useState<File[]>([]);
   const [toInput, setToInput] = React.useState(replyTo?.email || "");
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [disableSend, setDisableSend] = React.useState<boolean>(true);
 
   const [subject, setSubject] = useQueryState("subject", {
     defaultValue: "",
@@ -58,6 +59,14 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
     parse: (value) => decompressText(value),
     serialize: (value) => compressText(value),
   });
+
+  React.useEffect(() => {
+    if (toInput && subject) {
+      setDisableSend(false);
+    } else {
+      setDisableSend(true);
+    }
+  }, [toInput, subject]);
 
   const { isOpen } = useOpenComposeModal();
 
@@ -394,7 +403,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
               <div
                 ref={editorRef}
                 contentEditable
-                className="min-h-[300px] w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="scrollbar-thumb-rounded-full h-72 w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background scrollbar scrollbar-track-transparent scrollbar-thumb-[#5d5a5a] placeholder:text-muted-foreground hover:scrollbar-thumb-[#777474] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 role="textbox"
                 aria-multiline="true"
                 tabIndex={9}
@@ -434,6 +443,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                       handleDraft();
                       onClose();
                     }}
+                    disabled={disableSend}
                   >
                     Save as draft
                   </Button>
@@ -443,6 +453,7 @@ export function MailCompose({ onClose, replyTo }: MailComposeProps) {
                       // TODO: Implement send functionality
                       onClose();
                     }}
+                    disabled={disableSend}
                   >
                     Send
                     <Send className="ml-2 h-3 w-3" />
