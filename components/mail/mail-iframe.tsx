@@ -48,6 +48,7 @@ export function MailIframe({ html }: { html: string }) {
         </div>
       )}
       <iframe
+        scrolling="no"
         height={height}
         ref={iframeRef}
         className={cn(
@@ -58,7 +59,7 @@ export function MailIframe({ html }: { html: string }) {
         sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-scripts"
         style={{
           width: "100%",
-          overflow: "auto",
+          overflow: "hidden",
         }}
       />
     </>
