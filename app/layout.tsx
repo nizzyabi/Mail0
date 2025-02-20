@@ -1,9 +1,10 @@
 import MailComposeModal from "@/components/mail/mail-compose-modal";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import { siteConfig } from "@/lib/site-config";
 import { Toast } from "@/components/ui/toast";
 import { Providers } from "@/lib/providers";
+import { AI } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
 import { Suspense } from "react";
@@ -39,7 +40,7 @@ export default function RootLayout({
           <Suspense>
             <MailComposeModal />
           </Suspense>
-          {children}
+          <AI>{children}</AI>
           <Toast />
           <Analytics />
         </Providers>

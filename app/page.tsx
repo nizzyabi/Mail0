@@ -12,12 +12,8 @@ export default function Home() {
     redirect("/mail/inbox");
   }
   return (
-    <div className="relative h-screen min-h-screen w-full overflow-y-scroll scroll-smooth bg-grid-small-black/[0.39] dark:bg-grid-small-white/[0.025]">
-      {/* Radial gradient for the container to give a faded look */}
-      {/* <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[900px] w-[900px] bg-gradient-to-r from-white/5 via-white/5 to-white/5 blur-[200px] rounded-full" />
-      </div> */}
-      <div className="relative mx-auto mb-4 flex max-w-7xl flex-col">
+    <div className="relative h-screen min-h-screen w-full overflow-hidden bg-grid-small-black/[0.39] dark:bg-grid-small-white/[0.025]">
+      <div className="relative mx-auto flex max-w-7xl flex-col">
         <Navbar />
         <Hero />
         <HeroImage />
