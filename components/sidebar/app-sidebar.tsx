@@ -3,18 +3,18 @@
 import { SquarePenIcon, SquarePenIconHandle } from "../icons/animated/square-pen";
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
 import { SidebarThemeSwitch } from "@/components/theme/sidebar-theme-switcher";
+import { SidebarContent as AppSidebarContent } from "./sidebar-content";
 import { useOpenComposeModal } from "@/hooks/use-open-compose-modal";
 import { navigationConfig } from "@/config/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 import React, { useMemo, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { $fetch } from "@/lib/auth-client";
 import { BASE_URL } from "@/lib/constants";
-import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { Button } from "./button";
 import Image from "next/image";
 import useSWR from "swr";
 
@@ -32,7 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       pathname.startsWith(config.path),
     );
 
-    const currentSection = section?.[0] || "mail";
+    const currentSection: string = section ? section[0] : "mail";
     const items = [...navigationConfig[currentSection].sections];
 
     if (currentSection === "mail" && stats) {
@@ -93,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               transition={{ duration: 0.2 }}
               className="flex-1 py-0"
             >
-              <NavMain items={navItems} />
+              <AppSidebarContent items={navItems} />
             </motion.div>
           </AnimatePresence>
         </SidebarContent>

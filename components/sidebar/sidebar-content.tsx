@@ -11,9 +11,10 @@ import {
   SidebarMenuItem,
   SidebarGroupLabel,
   SidebarMenuButton,
-} from "./sidebar";
+} from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { BASE_URL } from "@/lib/constants";
+import { isActive } from "@/lib/is-active";
 import { cn } from "@/lib/utils";
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -36,7 +37,7 @@ interface NavItemProps {
   isSettingsPage?: boolean;
 }
 
-interface NavMainProps {
+interface SidebarContentProps {
   items: {
     title: string;
     items: NavItemProps[];
@@ -49,63 +50,35 @@ type IconRefType = SVGSVGElement & {
   stopAnimation?: () => void;
 };
 
-export function NavMain({ items }: NavMainProps) {
+export function SidebarContent({ items }: SidebarContentProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const getHref = useCallback(
     (item: NavItemProps) => {
-      // Get the current 'from' parameter
       const currentFrom = searchParams.get("from");
       const category = searchParams.get("category");
 
-      // Handle settings navigation
       if (item.isSettingsButton) {
-        // Include current path with category query parameter if present
         const currentPath = category
           ? `${pathname}?category=${encodeURIComponent(category)}`
           : pathname;
         return `${item.url}?from=${encodeURIComponent(currentPath)}`;
       }
 
-      // Handle settings pages navigation
       if (item.isSettingsPage && currentFrom) {
         return `${item.url}?from=${encodeURIComponent(currentFrom)}`;
       }
 
-      // Handle back button
       if (item.isBackButton) {
         return currentFrom ? decodeURIComponent(currentFrom) : "/mail";
       }
 
-      // Handle category links
       if (category && item.url.includes("category=")) {
         return item.url;
       }
 
       return item.url;
-    },
-    [pathname, searchParams],
-  );
-
-  const isUrlActive = useCallback(
-    (url: string) => {
-      const urlObj = new URL(
-        url,
-        typeof window === "undefined" ? BASE_URL : window.location.origin,
-      );
-      const cleanPath = pathname.replace(/\/$/, "");
-      const cleanUrl = urlObj.pathname.replace(/\/$/, "");
-
-      if (cleanPath !== cleanUrl) return false;
-
-      const urlParams = new URLSearchParams(urlObj.search);
-      const currentParams = new URLSearchParams(searchParams);
-
-      for (const [key, value] of urlParams) {
-        if (currentParams.get(key) !== value) return false;
-      }
-      return true;
     },
     [pathname, searchParams],
   );
@@ -130,7 +103,7 @@ export function NavMain({ items }: NavMainProps) {
                   <NavItem
                     key={item.url}
                     {...item}
-                    isActive={isUrlActive(item.url)}
+                    isActive={isActive(item.url, pathname, searchParams)}
                     href={getHref(item)}
                   />
                 ))}

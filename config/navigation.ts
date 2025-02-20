@@ -1,14 +1,18 @@
-import { Settings, Mail, Shield, Palette, Keyboard, Bell } from "lucide-react";
 import { SettingsGearIcon } from "@/components/icons/animated/settings-gear";
+import { ShieldCheckIcon } from "@/components/icons/animated/shield-check";
 import { CheckCheckIcon } from "@/components/icons/animated/check-check";
 import { MessageCircleIcon } from "@/components/icons/animated/message";
+import { ArrowLeftIcon } from "@/components/icons/animated/arrow-left";
 import { BookTextIcon } from "@/components/icons/animated/book-text";
+import { KeyboardIcon } from "@/components/icons/animated/keyboard";
 import { ArchiveIcon } from "@/components/icons/animated/archive";
+import { ConnectIcon } from "@/components/icons/animated/connect";
 import { UsersIcon } from "@/components/icons/animated/users";
 import { InboxIcon } from "@/components/icons/animated/inbox";
 import { CartIcon } from "@/components/icons/animated/cart";
 import { BellIcon } from "@/components/icons/animated/bell";
 import { XIcon } from "@/components/icons/animated/x";
+import { Settings, Palette } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 
 interface NavItem {
@@ -146,7 +150,7 @@ export const navigationConfig: Record<string, NavConfig> = {
           {
             title: "Back to Mail",
             url: "/mail",
-            icon: ChevronLeft,
+            icon: ArrowLeftIcon,
             isBackButton: true,
           },
         ],
@@ -157,17 +161,17 @@ export const navigationConfig: Record<string, NavConfig> = {
           {
             title: "General",
             url: "/settings/general",
-            icon: Settings,
+            icon: SettingsGearIcon,
           },
           {
             title: "Connections",
             url: "/settings/connections",
-            icon: Mail,
+            icon: ConnectIcon,
           },
           {
             title: "Security",
             url: "/settings/security",
-            icon: Shield,
+            icon: ShieldCheckIcon,
           },
           {
             title: "Appearance",
@@ -177,12 +181,12 @@ export const navigationConfig: Record<string, NavConfig> = {
           {
             title: "Shortcuts",
             url: "/settings/shortcuts",
-            icon: Keyboard,
+            icon: KeyboardIcon,
           },
           {
             title: "Notifications",
             url: "/settings/notifications",
-            icon: Bell,
+            icon: BellIcon,
           },
         ].map((item) => ({
           ...item,
